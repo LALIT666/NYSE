@@ -1,8 +1,11 @@
 import express from "express";
+import dotenv from "dotenv";
+dotenv.config();
+
 import instumentsRouter from "./routes/instruments.routes";
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT;
 app.use(express.json());
 
 app.get("/health", (req, res) => {
