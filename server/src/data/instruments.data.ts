@@ -1,4 +1,10 @@
-export const instruments = [
+export type InstrumentsType = {
+  symbol: string;
+  name: string;
+  price: number;
+};
+
+export const instruments: InstrumentsType[] = [
   {
     symbol: "AAPL",
     name: "Apple Inc.",

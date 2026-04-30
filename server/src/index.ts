@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import instumentsRouter from "./routes/instruments.routes";
+import { changePriceInEveryThreeSecond } from "./service/price-poller.service";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -13,6 +14,8 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/v1/instruments", instumentsRouter);
+
+changePriceInEveryThreeSecond();
 
 app.listen(PORT, () => {
   console.log(`server is running on port: http://localhost:${PORT}`);
