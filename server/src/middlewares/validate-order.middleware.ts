@@ -1,12 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { OrderType, SymbolEnum } from "../types/order.types";
-
-function faliureResponse(message: string) {
-  return {
-    success: false,
-    message,
-  };
-}
+import { faliureResponse } from "../utils/helper-function.utils";
 
 export function validateOrders(
   req: Request,

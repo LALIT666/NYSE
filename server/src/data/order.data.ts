@@ -1,4 +1,5 @@
-import type { Order, SymbolEnum, OrderType } from "../types/order.types";
+import { matchOrder } from "../service/matching-engine.service";
+import type { Order, OrderType, SymbolEnum } from "../types/order.types";
 
 export const orders: Order[] = [];
 
@@ -12,7 +13,7 @@ export function createOrder({
   type: OrderType;
   quantity: number;
   price: number;
-}): Order {
+}) {
   const newOrder: Order = {
     id: Date.now().toString(),
     symbol,
@@ -23,7 +24,14 @@ export function createOrder({
     timestamp: new Date().toISOString(),
   };
 
+  // ✅ Try matching BEFORE pushing to array
+  const result = matchOrder(newOrder, orders);
+
+  // ✅ Push order after matching attempt
   orders.push(newOrder);
 
-  return newOrder;
+  return {
+    order: newOrder,
+    ...result,
+  };
 }

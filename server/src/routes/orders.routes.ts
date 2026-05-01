@@ -13,13 +13,26 @@ ordersRouter.get("/", (req, res) => {
 ordersRouter.post("/", validateOrders, (req, res) => {
   const { symbol, type, quantity, price } = req.body;
 
-  const order = createOrder({ symbol, type, quantity, price });
+  const result = createOrder({ symbol, type, quantity, price });
 
-  if (!order) {
-    return res.status(500).json({ message: "Error in creating new order" });
+  if (!result) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Error in creating new order" });
   }
 
-  return res.status(201).json({ order });
+  if (result.matched) {
+    return res.status(201).json({
+      order: result.order,
+      matched: true,
+      matchedWith: result.matchOrder,
+    });
+  }
+
+  return res.status(201).json({
+    order: result.order,
+    matched: false,
+  });
 });
 
 export default ordersRouter;

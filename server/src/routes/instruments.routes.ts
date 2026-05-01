@@ -1,21 +1,11 @@
 import { Router } from "express";
 import { instruments, type InstrumentsType } from "../data/instruments.data";
+import {
+  faliureResponse,
+  successResponse,
+} from "../utils/helper-function.utils";
 
 export const instumentsRouter = Router();
-
-function successResponse(data: any) {
-  return {
-    success: true,
-    data,
-  };
-}
-
-function faliureResponse(message: string) {
-  return {
-    success: false,
-    message,
-  };
-}
 
 instumentsRouter.get("/", (req, res) => {
   throw new Error("test error");
