@@ -4,6 +4,7 @@ dotenv.config();
 
 import instumentsRouter from "./routes/instruments.routes";
 import { changePriceInEveryThreeSecond } from "./service/price-poller.service";
+import ordersRouter from "./routes/orders.routes";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -14,6 +15,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/v1/instruments", instumentsRouter);
+app.use("/api/v1/orders", ordersRouter);
 
 changePriceInEveryThreeSecond();
 
