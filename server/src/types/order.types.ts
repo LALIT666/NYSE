@@ -16,6 +16,6 @@ export interface Order {
   type: OrderType;
   quantity: number;
   price: number;
-  status: "open";
+  status: "open" | "filled" | "cancelled";
   timestamp: string;
 }

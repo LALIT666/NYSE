@@ -18,6 +18,8 @@ function faliureResponse(message: string) {
 }
 
 instumentsRouter.get("/", (req, res) => {
+  throw new Error("test error");
+
   return res.json({ instruments: instruments });
 });
 
