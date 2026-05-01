@@ -11,4 +11,5 @@ export function errorHandler(
     message: "Internal Server Error",
     error: err.message,
   });
+  console.error("Error: ", err.message);
 }

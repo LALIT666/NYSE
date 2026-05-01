@@ -20,8 +20,8 @@ app.get("/health", (req, res) => {
 app.use("/api/v1/instruments", instumentsRouter);
 app.use("/api/v1/orders", ordersRouter);
 
-app.use(errorHandler);
 app.use(notFound);
+app.use(errorHandler);
 
 changePriceInEveryThreeSecond();
 
