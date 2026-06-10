@@ -1,5 +1,5 @@
 {
-  "name": "http-server",
+  "name": "redis-engine",
   "module": "index.ts",
   "type": "module",
   "private": true,
@@ -8,10 +8,7 @@
     "start": "bun run src/index.ts"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^3.0.0",
     "@types/bun": "latest",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.9.1",
     "@types/uuid": "^11.0.0"
   },
@@ -19,11 +16,7 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
     "redis": "^6.0.0",
-    "uuid": "^14.0.0",
-    "zod": "^4.4.3"
+    "uuid": "^14.0.0"
   }
 }
