@@ -164,3 +164,22 @@ router.delete("/:orderId", (req: AuthRequest, res: Response): void => {
 
   res.json({ message: "Order cancelled", orderId: order.orderId });
 });
+
+// Route 10: GET /api/v1/orders/open/list
+// Saare open (pending/partial) orders dekhne ke liye
+
+router.get("/open/list", (req: AuthRequest, res: Response): void => {
+  const orderIds = userOrders.get(req.user!.userId) || new Set();
+
+  const openOrders: Order[] = [];
+
+  orderIds.forEach((orderId) => {
+    const order = orders.get(orderId);
+
+    if (order && (order.status === "pending" || order.status === "partial")) {
+      openOrders.push(order);
+    }
+  });
+
+  res.json({ orders: openOrders });
+});
