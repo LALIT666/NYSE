@@ -2,6 +2,7 @@ import express from "express";
 import { PORT } from "./config/config";
 import authRoutes from "./routes/auth.routes";
 import balanceRoutes from "./routes/balance.routes";
+import marketRoutes from "./routes/market.routes";
 
 import orderRoutes from "./routes/orders.routes";
 
@@ -22,6 +23,7 @@ app.get("/api/v1/healthy", (req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/balance", balanceRoutes);
 app.use("/api/v1/order", orderRoutes);
+app.use("/api/v1", marketRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Exchange API running on http://localhost:${PORT}`);
