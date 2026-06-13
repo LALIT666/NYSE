@@ -100,3 +100,7 @@ router.post("/sigin", async (req: Request, res: Response): Promise<void> => {
 
   res.json({ token });
 });
+
+//Route 3: GET /api/v1/auth/me
+
+router.get("/me");

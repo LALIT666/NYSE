@@ -1,3 +1,6 @@
+import { email } from "zod";
+import type { Request } from "express";
+
 export interface User {
   userId: string;
   email: string;
@@ -15,4 +18,15 @@ export interface Balance {
 export interface UserBalance {
   userId: string;
   assets: Map<Asset, Balance>;
+}
+
+//for middleware
+
+export interface JwtPayload {
+  userId: string;
+  email: string;
+}
+
+export interface AuthRequest extends Request {
+  user?: JwtPayload;
 }
