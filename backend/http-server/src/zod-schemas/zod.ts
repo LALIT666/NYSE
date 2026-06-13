@@ -14,6 +14,12 @@ export const DepositSchema = z.object({
   asset: z.enum(["INR", "TATA", "PAYTM", "ZOMATO"]),
   amount: z.number().positive(),
 });
+
+export const WithdrawSchema = z.object({
+  asset: z.enum(["INR", "TATA", "PAYTM", "ZOMATO"]),
+  amount: z.number().positive(),
+});
 export type SignupInput = z.infer<typeof SignupSchema>;
 export type SigninInput = z.infer<typeof SigninSchema>;
 export type DepositInput = z.infer<typeof DepositSchema>;
+export type WithdrawInput = z.infer<typeof WithdrawSchema>;
