@@ -2,6 +2,7 @@ import type {
   Asset,
   Market,
   Order,
+  Trade,
   User,
   UserBalance,
 } from "../types-interfaces/types";
@@ -11,6 +12,18 @@ export const users = new Map<string, User>();
 export const usersById = new Map<string, User>();
 
 export const balances = new Map<string, UserBalance>();
+
+export const orders = new Map<string, Order>();
+
+export const userOrders = new Map<string, Set<string>>();
+
+export const marketTrades = new Map<Market, Trade[]>();
+
+export const AVALIABLE_MARKETS: Market[] = [
+  "TATA_INR",
+  "PAYTM_INR",
+  "ZOMATO_INR",
+];
 
 // marketAssets: Har market ke liye base aur quote asset kya hai
 // Base asset  = jo cheez kharid/bech rahe ho (TATA, PAYTM, ZOMATO)
@@ -23,7 +36,3 @@ export const marketAssets: Record<Market, { base: Asset; quote: Asset }> = {
 
   ZOMATO_INR: { base: "ZOMATO", quote: "INR" },
 };
-
-export const orders = new Map<string, Order>();
-
-export const userOrders = new Map<string, Set<string>>();

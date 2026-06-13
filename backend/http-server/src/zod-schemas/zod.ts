@@ -31,6 +31,14 @@ export const OrderSchema = z.object({
 
   market: z.enum(["TATA_INR", "PAYTM_INR", "ZOMATO_INR"]),
 });
+//for market routes
+export const KlineQuerySchema = z.object({
+  interval: z.enum(["1m", "5m", "15m", "1h", "1d"]).default("1h"),
+  // limit: Kitne candles chahiye
+  // coerce.number = string "100" ko number 100 me convert kar do (URL params strings hote hai)
+  limit: z.coerce.number().int().positive().max(500).default(100),
+});
+
 export type SignupInput = z.infer<typeof SignupSchema>;
 export type SigninInput = z.infer<typeof SigninSchema>;
 export type DepositInput = z.infer<typeof DepositSchema>;

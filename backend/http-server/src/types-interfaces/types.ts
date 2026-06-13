@@ -54,3 +54,39 @@ export interface Order {
   createdAt: Date;
   updatedAt: Date;
 }
+
+//Trade -- market
+export interface Trade {
+  tradeId: string;
+  market: Market;
+  price: number;
+  quantity: number;
+  buyerUserId: string;
+  sellerUserId: string;
+  buyOrderId: string;
+  sellOrderId: string;
+  timestamp: Date;
+}
+
+export interface Kline {
+  open: number; // us time period ki shuruaat ki price
+  high: number; // us time period ki sabse mehengi price
+  low: number; // us time period ki sabse sasti price
+  close: number; // us time period ki akhri price
+  volume: number; // us time period me total kitna trade hua
+  timestamp: Date;
+}
+
+export interface Depth {
+  bids: [number, number][]; // kharidne wale - [price, quantity] format me -- ME ISME HAMASHA CONFUSE HOTA HU
+  asks: [number, number][]; // bechne wale   - [price, quantity] format me
+}
+
+export interface Ticker {
+  market: Market;
+  lastPrice: number;
+  high24h: number;
+  low24h: number;
+  volume24h: number;
+  priceChange24h: number; // up/down in the last 24 hours
+}
