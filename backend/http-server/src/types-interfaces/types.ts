@@ -10,6 +10,12 @@ export interface User {
 
 export type Asset = "INR" | "TATA" | "PAYTM" | "ZOMATO";
 
+export type Market = "TATA_INR" | "PAYTM_INR" | "ZOMATO_INR";
+
+export type OrderKind = "buy" | "sell";
+
+export type OrderType = "limit" | "market";
+
 export interface Balance {
   available: number; // jo paisa/stock abhi use kar sakte ho
   locked: number; // jo paisa/stock kisi order me fas gaya hai, use nahi kar sakte abhi
@@ -29,4 +35,22 @@ export interface JwtPayload {
 
 export interface AuthRequest extends Request {
   user?: JwtPayload;
+}
+
+//Order
+
+export type OrderStatus = "pending" | "filled" | "partial" | "cancelled";
+
+export interface Order {
+  orderId: string;
+  userId: string;
+  kind: OrderKind;
+  type: OrderType;
+  price: number;
+  quantity: number;
+  filledQuantity: number;
+  market: Market;
+  status: OrderStatus;
+  createdAt: Date;
+  updatedAt: Date;
 }
