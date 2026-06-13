@@ -1,3 +1,4 @@
+import { assert } from "node:console";
 import { balances } from "../data/in-memory-database";
 import type { Asset, Balance, UserBalance } from "../types-interfaces/types";
 
@@ -19,4 +20,22 @@ export const initBalance = (userId: string): UserBalance => {
   balances.set(userId, userBalance);
 
   return userBalance;
+};
+
+//GET USER BALANCE
+
+export const getUserBalance = (userId: string): UserBalance => {
+  return balances.get(userId) || initBalance(userId);
+};
+
+//converting userbalance into JSON object
+
+export const serializeBalance = (ub: UserBalance) => {
+  const obj: Record<string, Balance> = {};
+
+  ub.assets.forEach((bal, asset) => {
+    obj[asset] = bal;
+  });
+
+  return obj;
 };
