@@ -1,4 +1,4 @@
-import type { User } from "./../types-interfaces/types";
+import type { AuthRequest, User } from "./../types-interfaces/types";
 
 import { Router } from "express";
 import type { Request, Response, NextFunction } from "express";
@@ -10,11 +10,12 @@ import {
   SignupSchema,
   type SigninInput,
 } from "../zod-schemas/zod";
-import { userById, users } from "../data/in-memory-database";
+import { usersById, users } from "../data/in-memory-database";
 import { initBalance } from "../helper/helpers";
 import { type JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/config";
+import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = Router();
 
@@ -50,7 +51,7 @@ router.post("/singup", async (req: Request, res: Response): Promise<void> => {
 
   users.set(email, newUser);
 
-  userById.set(newUser.userId, newUser);
+  usersById.set(newUser.userId, newUser);
 
   initBalance(newUser.userId);
 
@@ -103,4 +104,19 @@ router.post("/sigin", async (req: Request, res: Response): Promise<void> => {
 
 //Route 3: GET /api/v1/auth/me
 
-router.get("/me");
+router.get("/me", authMiddleware, (req: AuthRequest, res: Response): void => {
+  const user = usersById.get(req.user!.userId);
+
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  res.json({
+    userId: user.userId,
+    email: user.email,
+    createdAt: user.createdAt,
+  });
+});
+
+export default router;

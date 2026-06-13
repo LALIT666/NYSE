@@ -1,5 +1,6 @@
 import express from "express";
 import { PORT } from "./config/config";
+import authRoutes from "./routes/auth.routes";
 
 const app = express();
 
@@ -14,6 +15,8 @@ app.get("/api/v1/healthy", (req, res) => {
     message: "✅ Http-Server is healthy",
   });
 });
+
+app.use("/api/v1/auth", authRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Exchange API running on http://localhost:${PORT}`);
