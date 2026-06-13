@@ -88,6 +88,8 @@ router.post("/", (req: AuthRequest, res: Response): void => {
 // checking specific order
 
 router.get("/:orderId", (req: AuthRequest, res: Response): void => {
+  //error -- Argument of type 'string | string[]' is not assignable to parameter of type 'string'.  Type 'string[]' is not assignable to type 'string'.
+
   const order = orders.get(req.params.orderId!);
 
   if (!order) {
