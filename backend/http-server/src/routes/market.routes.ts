@@ -91,3 +91,19 @@ router.get("/ticker/:market", (req: Request, res: Response): void => {
 
   res.json(ticker);
 });
+
+// Route 15: GET /api/v1/trades/:market
+// Is market ke recent trades dekhne ke liye
+
+router.get("/trades/:market", (req: Request, res: Response): void => {
+  const market = req.params.market as Market;
+
+  if (!AVAILABLE_MARKETS.includes(market)) {
+    res.status(404).json({ message: "Market not found" });
+    return;
+  }
+
+  const mTrades = marketTrades.get(market) || [];
+
+  res.json({ trades: mTrades.slice(-50).reverse() });
+});
