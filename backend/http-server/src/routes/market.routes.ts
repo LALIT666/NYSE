@@ -1,6 +1,10 @@
 import { Router, type Request, type Response } from "express";
-import { AVAILABLE_MARKETS, orders } from "../data/in-memory-database";
-import type { Depth, Market } from "../types-interfaces/types";
+import {
+  AVAILABLE_MARKETS,
+  marketTrades,
+  orders,
+} from "../data/in-memory-database";
+import type { Depth, Market, Ticker, Trade } from "../types-interfaces/types";
 import { object } from "zod";
 
 const router = Router();
@@ -51,4 +55,39 @@ router.get("/depth/:market", (req: Request, res: Response): void => {
   };
 
   res.json(depth);
+});
+
+// Route 14: GET /api/v1/ticker/:market
+// Market ka summary - last price, 24h high/low, volume
+router.get("/ticker/:market", (req: Request, res: Response): void => {
+  const market = req.params.market as Market;
+
+  if (!AVAILABLE_MARKETS.includes(market)) {
+    res.status(404).json({ message: "Market not found" });
+    return;
+  }
+
+  const mTrades = marketTrades.get(market) || [];
+
+  const last24h = mTrades.filter(
+    //agar time grater hai filter if inbetween add in array
+    (t) => t.timestamp.getTime() > Date.now() - 24 * 60 * 60 * 1000,
+  );
+
+  // Last 24h ke saare trade prices ki array
+  const prices = last24h.map((t) => t.price);
+
+  const volume = last24h.reduce((acc, t) => acc + t.quantity, 0);
+
+  const ticker: Ticker = {
+    market,
+    lastPrice: mTrades.length ? mTrades[mTrades.length - 1]!.price : 0,
+    high24h: prices.length ? Math.max(...prices) : 0,
+    low24h: prices.length ? Math.min(...prices) : 0,
+    volume24h: volume,
+    priceChange24h:
+      prices.length > 1 ? prices[prices.length - 1]! - prices[0]! : 0,
+  };
+
+  res.json(ticker);
 });
