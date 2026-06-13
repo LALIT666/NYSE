@@ -83,3 +83,22 @@ router.post("/", (req: AuthRequest, res: Response): void => {
     message: "Order placed successfully",
   });
 });
+
+// Route 8: GET /api/v1/order/:orderId
+// checking specific order
+
+router.get("/:orderId", (req: AuthRequest, res: Response): void => {
+  const order = orders.get(req.params.orderId!);
+
+  if (!order) {
+    res.status(404).json({ message: "Order not found" });
+    return;
+  }
+
+  if (order.userId !== req.user!.userId) {
+    res.status(403).json({ message: "Forbidden" });
+    return;
+  }
+
+  res.json(order);
+});
