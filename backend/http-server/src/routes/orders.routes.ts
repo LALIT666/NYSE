@@ -6,6 +6,7 @@ import type { AuthRequest, Order } from "../types-interfaces/types";
 import { OrderSchema, type OrderInput } from "../zod-schemas/zod";
 import { getUserBalance } from "../helper/helpers";
 import { marketAssets } from "../data/in-memory-database";
+import { string } from "zod";
 
 const router = Router();
 
@@ -90,7 +91,13 @@ router.post("/", (req: AuthRequest, res: Response): void => {
 router.get("/:orderId", (req: AuthRequest, res: Response): void => {
   //error -- Argument of type 'string | string[]' is not assignable to parameter of type 'string'.  Type 'string[]' is not assignable to type 'string'.
 
-  const order = orders.get(req.params.orderId!);
+  const orderId = req.params.orderId!;
+
+  if (typeof orderId !== "string") {
+    res.status(401).json({ message: "Invalid orderId" });
+    return;
+  }
+  const order = orders.get(orderId);
 
   if (!order) {
     res.status(404).json({ message: "Order not found" });
