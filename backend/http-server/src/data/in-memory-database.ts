@@ -19,7 +19,7 @@ export const userOrders = new Map<string, Set<string>>();
 
 export const marketTrades = new Map<Market, Trade[]>();
 
-export const AVALIABLE_MARKETS: Market[] = [
+export const AVAILABLE_MARKETS: Market[] = [
   "TATA_INR",
   "PAYTM_INR",
   "ZOMATO_INR",
