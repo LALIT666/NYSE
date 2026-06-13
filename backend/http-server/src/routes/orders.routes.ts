@@ -111,3 +111,56 @@ router.get("/:orderId", (req: AuthRequest, res: Response): void => {
 
   res.json(order);
 });
+
+// Route 9: DELETE /api/v1/order/:orderId
+//to cancel the order
+router.delete("/:orderId", (req: AuthRequest, res: Response): void => {
+  const orderId = req.params.orderId!;
+
+  if (typeof orderId !== "string") {
+    res.status(401).json({ message: "Invalid orderId" });
+    return;
+  }
+
+  const order = orders.get(orderId);
+  if (!order) {
+    res.status(404).json({ message: "Order not found" });
+    return;
+  }
+
+  if (order.userId !== req.user!.userId) {
+    res.status(403).json({ message: "Forbidden" });
+    return;
+  }
+
+  if (order.status === "filled" || order.status === "cancelled") {
+    res.status(400).json({ message: `Cannot cancel ${order.status} order` });
+    return;
+  }
+
+  const ub = getUserBalance(order.userId);
+  const { base, quote } = marketAssets[order.market];
+
+  //kuch kuch order abhi fill ho chuke hai and kuch kuch nahi hue hai toh jo bachae hai kewel wahi unlock hongae right
+  const remaining = order.quantity - order.filledQuantity;
+
+  if (order.kind === "buy") {
+    const quoteBal = ub.assets.get(quote)!;
+
+    const unlock = remaining * order.price;
+    quoteBal.locked -= unlock;
+    quoteBal.available += unlock;
+  } else {
+    const baseBal = ub.assets.get(base)!;
+    baseBal.locked -= remaining;
+    baseBal.available += remaining;
+  }
+
+  order.status = "cancelled";
+
+  order.updatedAt = new Date();
+
+  orders.set(order.orderId, order);
+
+  res.json({ message: "Order cancelled", orderId: order.orderId });
+});
