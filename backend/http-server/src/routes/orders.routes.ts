@@ -183,3 +183,26 @@ router.get("/open/list", (req: AuthRequest, res: Response): void => {
 
   res.json({ orders: openOrders });
 });
+
+// Route 11: GET /api/v1/orders/history
+// Purane (filled/cancelled) orders dekhne ke liye
+
+router.get("/history/list", (req: AuthRequest, res: Response): void => {
+  const orderIds = userOrders.get(req.user!.userId) || new Set();
+
+  const history: Order[] = [];
+
+  orderIds.forEach((orderId) => {
+    const order = orders.get(orderId);
+
+    //Sirf filled ya cancelled orders history me daalo
+
+    if (order && (order.status === "filled" || order.status === "cancelled")) {
+      history.push(order);
+    }
+  });
+
+  res.json({ orders: history });
+});
+
+export default router;
