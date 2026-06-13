@@ -4,8 +4,15 @@ import {
   marketTrades,
   orders,
 } from "../data/in-memory-database";
-import type { Depth, Market, Ticker, Trade } from "../types-interfaces/types";
+import type {
+  Depth,
+  Kline,
+  Market,
+  Ticker,
+  Trade,
+} from "../types-interfaces/types";
 import { object } from "zod";
+import { KlineQuerySchema } from "../zod-schemas/zod";
 
 const router = Router();
 
@@ -107,3 +114,34 @@ router.get("/trades/:market", (req: Request, res: Response): void => {
 
   res.json({ trades: mTrades.slice(-50).reverse() });
 });
+
+// Route 16: GET /api/v1/klines/:market
+// Candle chart data dekhne ke liye
+
+router.get("/klines/:market", (req: Request, res: Response): void => {
+  const market = req.params.market as Market;
+
+  if (!AVAILABLE_MARKETS.includes(market)) {
+    res.status(404).json({ message: "Market not found" });
+    return;
+  }
+
+  const parsed = KlineQuerySchema.safeParse(req.query);
+
+  if (!parsed.success) {
+    res.status(400).json({
+      message: "Invalid query",
+      errors: parsed.error.issues,
+    });
+    return;
+  }
+
+  const klines: Kline[] = [];
+
+  res.json({
+    klines,
+    interval: parsed.data.interval,
+  });
+});
+
+export default router;
