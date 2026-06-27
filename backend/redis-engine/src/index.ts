@@ -53,3 +53,11 @@ const initBalance = (userId: string): UserBalance => {
 
   return ub;
 };
+
+const handleInitBalance = (data: { userId: string }): EngineResponse => {
+  if (!balances.has(data.userId)) {
+    initBalance(data.userId);
+  }
+
+  return { ok: true, data: { userId: data.userId } };
+};
