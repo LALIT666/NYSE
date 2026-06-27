@@ -3,6 +3,7 @@ import { PORT } from "./config/config";
 import authRoutes from "./routes/auth.routes";
 import balanceRoutes from "./routes/balance.routes";
 import marketRoutes from "./routes/market.routes";
+import userRoutes from "./routes/user.routes";
 
 import orderRoutes from "./routes/orders.routes";
 
@@ -24,6 +25,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/balance", balanceRoutes);
 app.use("/api/v1/order", orderRoutes);
 app.use("/api/v1", marketRoutes);
+app.use("/api/v1/user", userRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Exchange API running on http://localhost:${PORT}`);
