@@ -1,7 +1,7 @@
 import type { AuthRequest, User } from "./../types-interfaces/types";
 
 import { Router } from "express";
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response } from "express";
 
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
