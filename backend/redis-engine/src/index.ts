@@ -62,6 +62,9 @@ const handleInitBalance = (data: { userId: string }): EngineResponse => {
   return { ok: true, data: { userId: data.userId } };
 };
 
+/////////////////////////////////////////////////
+//2ND
+
 //Get balance
 const getBalance = (userId: string): UserBalance => {
   return balances.get(userId) ?? initBalance(userId);
@@ -113,4 +116,43 @@ const handleWithdraw = (data: {
     return { ok: false, message: "Insufficient balance" };
   bal.available -= data.amount;
   return { ok: true, data: { balances: bal } };
+};
+
+/////////////////////////////////////////////////
+//3RD
+type OrderKind = "buy" | "sell";
+type OrderType = "limit" | "market";
+type OrderStatus = "pending" | "filled" | "partial" | "cancelled";
+type Market = "TATA_INR" | "PAYTM_INR" | "ZOMATO_INR";
+
+interface Order {
+  orderId: string;
+  userId: string;
+  kind: OrderKind;
+  type: OrderType;
+  price: number;
+  quantity: number;
+  filledQuantity: number;
+  market: Market;
+  status: OrderStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+//OrderId -> Order ka poora data
+const orders = new Map<string, Order>();
+// UserId  -> Uske saare orderIds ka Set
+const userOrders = new Map<string, Set<string>>();
+
+//get Single Order
+const handleGetOrder = (data: {
+  userId: string;
+  orderId: string;
+}): EngineResponse => {
+  const order = orders.get(data.orderId);
+  if (!order) return { ok: false, message: "Order not found" };
+
+  if (order.userId !== data.userId) return { ok: false, message: "Forbidden" }; //can't check other's order
+
+  return { ok: true, data: order };
 };
