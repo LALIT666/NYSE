@@ -189,3 +189,32 @@ const handleGetOrderHistory = (data: { userId: string }): EngineResponse => {
 
   return { ok: true, data: { orders: result } };
 };
+
+// !4th
+
+const handleGetDepth = (data: { market: Market }): EngineResponse => {
+  const bidsMap = new Map<number, number>();
+  const asksMap = new Map<number, number>();
+
+  orders.forEach((o) => {
+    if (
+      o.market !== data.market ||
+      (o.status !== "pending" && o.status !== "partial")
+    )
+      return;
+
+    const remaining = o.quantity - o.filledQuantity;
+
+    if (o.kind === "buy") {
+      bidsMap.set(o.price, (bidsMap.get(o.price) ?? 0) + remaining);
+    } else {
+      asksMap.set(o.price, (asksMap.get(o.price) ?? 0) + remaining);
+    }
+  });
+
+  const bids = Array.from(bidsMap.entries()).sort((a, b) => b[0] - a[0]);
+
+  const asks = Array.from(asksMap.entries()).sort((a, b) => a[0] - b[0]);
+
+  return { ok: true, data: { bids: asks } };
+};
