@@ -61,3 +61,8 @@ const handleInitBalance = (data: { userId: string }): EngineResponse => {
 
   return { ok: true, data: { userId: data.userId } };
 };
+
+//Get balance
+const getBalance = (userId: string): UserBalance => {
+  return balances.get(userId) ?? initBalance(userId);
+};
