@@ -218,3 +218,42 @@ const handleGetDepth = (data: { market: Market }): EngineResponse => {
 
   return { ok: true, data: { bids: asks } };
 };
+
+//Ticker (summary of the last 24 hours)
+
+interface Trade {
+  tradeId: string;
+  market: Market;
+  price: number;
+  quantity: number;
+  buyerUserId: string;
+  sellerUserId: string;
+  buyOrderId: string;
+  sellOrderId: string;
+  timestamp: Date;
+}
+
+const marketTrades = new Map<Market, Trade[]>();
+
+const handleTicker = (data: { market: Market }): EngineResponse => {
+  const mTrades = marketTrades.get(data.market) ?? [];
+
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+
+  const last24h = mTrades.filter((t) => t.timestamp.getTime() > cutoff);
+  const prices = last24h.map((t) => t.price);
+  const volume = last24h.reduce((acc, t) => acc + t.quantity, 0);
+
+  return {
+    ok: true,
+    data: {
+      market: data.market,
+      lastPrice: mTrades.length ? mTrades[mTrades.length - 1]!.price : 0,
+      high24h: prices.length ? Math.max(...prices) : 0,
+      low24h: prices.length ? Math.min(...prices) : 0,
+      volume24h: volume,
+      priceChange24h:
+        prices.length > 1 ? prices[prices.length - 1]! - prices[0]! : 0,
+    },
+  };
+};
