@@ -98,3 +98,19 @@ const handleDeposit = (data: {
 
   return { ok: true, data: { balance: bal } };
 };
+
+const handleWithdraw = (data: {
+  userId: string;
+  asset: Asset;
+  amount: number;
+}): EngineResponse => {
+  const ub = getBalance(data.userId);
+  const bal = ub.assets.get(data.asset);
+
+  if (!bal) return { ok: false, message: "Invalid asset" };
+
+  if (bal.available < data.amount)
+    return { ok: false, message: "Insufficient balance" };
+  bal.available -= data.amount;
+  return { ok: true, data: { balances: bal } };
+};
