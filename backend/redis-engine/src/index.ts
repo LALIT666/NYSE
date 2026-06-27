@@ -66,3 +66,14 @@ const handleInitBalance = (data: { userId: string }): EngineResponse => {
 const getBalance = (userId: string): UserBalance => {
   return balances.get(userId) ?? initBalance(userId);
 };
+
+// basically we are changing map to normal JSON object because we can not send Map into JSON
+const serializeBalance = (ub: UserBalance): Record<string, Balance> => {
+  const obj: Record<string, Balance> = {};
+
+  ub.assets.forEach((bal, asset) => {
+    obj[asset] = bal;
+  });
+
+  return obj;
+};
