@@ -172,3 +172,20 @@ const handleGetOpenOrders = (data: { userId: string }): EngineResponse => {
 
   return { ok: true, data: { orders: result } };
 };
+
+//filled or cancelled orders
+const handleGetOrderHistory = (data: { userId: string }): EngineResponse => {
+  const ids = userOrders.get(data.userId) ?? new Set<string>();
+
+  const result: Order[] = [];
+
+  ids.forEach((id) => {
+    const o = orders.get(id);
+
+    if (o && (o.status === "filled" || o.status === "cancelled")) {
+      result.push(o);
+    }
+  });
+
+  return { ok: true, data: { orders: result } };
+};
