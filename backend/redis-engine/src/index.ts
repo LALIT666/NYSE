@@ -156,3 +156,19 @@ const handleGetOrder = (data: {
 
   return { ok: true, data: order };
 };
+
+//geting pending orders
+const handleGetOpenOrders = (data: { userId: string }): EngineResponse => {
+  const ids = userOrders.get(data.userId) ?? new Set<string>();
+
+  const result: Order[] = [];
+
+  ids.forEach((id) => {
+    const o = orders.get(id);
+    if (o && (o.status === "pending" || o.status === "partial")) {
+      result.push(o);
+    }
+  });
+
+  return { ok: true, data: { orders: result } };
+};
