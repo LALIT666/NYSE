@@ -77,3 +77,8 @@ const serializeBalance = (ub: UserBalance): Record<string, Balance> => {
 
   return obj;
 };
+
+const handleGetBalance = (data: { userId: string }): EngineResponse => {
+  const ub = getBalance(data.userId);
+  return { ok: true, data: { balances: serializeBalance(ub) } };
+};
