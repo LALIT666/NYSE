@@ -257,3 +257,9 @@ const handleTicker = (data: { market: Market }): EngineResponse => {
     },
   };
 };
+
+const handleGetTrades = (data: { market: Market }): EngineResponse => {
+  const mTrades = marketTrades.get(data.market) ?? [];
+
+  return { ok: true, data: { trades: mTrades.slice(-50).reverse() } };
+};
