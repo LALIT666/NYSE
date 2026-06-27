@@ -82,3 +82,19 @@ const handleGetBalance = (data: { userId: string }): EngineResponse => {
   const ub = getBalance(data.userId);
   return { ok: true, data: { balances: serializeBalance(ub) } };
 };
+
+const handleDeposit = (data: {
+  userId: string;
+  asset: Asset;
+  amount: number;
+}): EngineResponse => {
+  const ub = getBalance(data.userId);
+
+  const bal = ub.assets.get(data.asset);
+
+  if (!bal) return { ok: false, message: "Invalid asset" };
+
+  bal.available += data.amount;
+
+  return { ok: true, data: { balance: bal } };
+};
