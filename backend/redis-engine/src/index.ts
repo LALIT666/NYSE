@@ -1,6 +1,6 @@
-import { marketAssets } from "./../../http-server/src/data/in-memory-database";
 //I am building redis using only one file beacause my mind get boggles while i use multiple files
 import { createClient, type RedisClientType } from "redis";
+import { v4 as uuidv4 } from "uuid";
 
 const REDIS_URL = "redis://localhost:6379";
 const MESSAGES_QUEUE = "messages";
@@ -267,6 +267,12 @@ const handleGetTrades = (data: { market: Market }): EngineResponse => {
 
 //! 6th part
 
+const marketAssets: Record<Market, { base: Asset; quote: Asset }> = {
+  TATA_INR: { base: "TATA", quote: "INR" },
+  PAYTM_INR: { base: "PAYTM", quote: "INR" },
+  ZOMATO_INR: { base: "ZOMATO", quote: "INR" },
+};
+
 const handleCancelOrder = (data: {
   userId: string;
   orderId: string;
@@ -296,4 +302,30 @@ const handleCancelOrder = (data: {
   order.status = "cancelled";
   order.updatedAt = new Date();
   return { ok: true, data: { orderid: order.orderId, status: "cancelled" } };
+};
+
+// ! part 7th
+
+const settleTrade = (
+  buyOrder: Order,
+  sellOrder: Order,
+  qty: number,
+  price: number,
+  market: Market,
+): void => {
+  const { base, quote } = marketAssets[market];
+  const buyerBal = getBalance(buyOrder.userId);
+  const sellerBal = getBalance(sellOrder.userId);
+
+  const cost = qty * price;
+  const lockedINR = qty * buyOrder.price;
+
+  buyerBal.assets.get(quote)!.locked -= lockedINR;
+  buyerBal.assets.get(base)!.available += qty;
+
+  if (lockedINR > cost)
+    buyerBal.assets.get(quote)!.available += lockedINR - cost;
+
+  sellerBal.assets.get(base)!.locked -= qty;
+  sellerBal.assets.get(quote)!.available += cost;
 };
