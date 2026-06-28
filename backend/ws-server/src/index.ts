@@ -5,6 +5,7 @@ import type { Client } from "./types/client.types";
 import { clients } from "./storage/clients.storage";
 import { sendToClient } from "./helpers/send-to-client.helper";
 import { handleClientMessage } from "./handlers/handle-client-message.handler";
+import { cleanupClient } from "./helpers/cleanup-client.helper";
 
 const wss = new WebSocketServer({ port: WS_PORT });
 
@@ -31,6 +32,16 @@ wss.on("connection", (ws: WebSocket) => {
 
   ws.on("message", (raw: Buffer) => {
     handleClientMessage(client, raw.toString());
+  });
+
+  ws.on("close", () => {
+    cleanupClient(client);
+  });
+
+  ws.on("error", (err) => {
+    console.log(`Client ${connectionId} error: ${err}`);
+
+    cleanupClient(client);
   });
 });
 
