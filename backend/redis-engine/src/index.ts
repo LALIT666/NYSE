@@ -416,3 +416,57 @@ const matchOrder = (incoming: Order): Fill[] => {
 
   return fills;
 };
+
+const handleCreateOrder = (data: any): EngineResponse => {
+  const ub = getBalance(data.userId);
+  const { base, quote } = marketAssets[data.market as Market];
+  if (data.kind === "buy") {
+    const needed = data.price * data.quantity;
+
+    if (ub.assets.get(quote)!.available < needed)
+      return { ok: false, message: "No funds" };
+
+    ub.assets.get(quote)!.available -= needed;
+    ub.assets.get(quote)!.locked += needed;
+  } else {
+    if (ub.assets.get(base)!.available < data.quantity)
+      return { ok: false, message: "No shares" };
+    ub.assets.get(base)!.available -= data.quantity;
+    ub.assets.get(base)!.locked += data.quantity;
+  }
+
+  const order: Order = {
+    orderId: uuidv4(),
+    userId: data.userId,
+    kind: data.kind,
+    type: data.orderType,
+    price: data.price,
+    quantity: data.quantity,
+    filledQuantity: 0,
+    market: data.market,
+    status: "pending",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const fills = matchOrder(order);
+
+  order.status =
+    order.filledQuantity === order.quantity
+      ? "filled"
+      : order.filledQuantity > 0
+        ? "partial"
+        : "pending";
+
+  orders.set(order.orderId, order);
+
+  if (!userOrders.has(data.userId)) {
+    userOrders.set(data.userId, new Set());
+  }
+  userOrders.get(data.userId)!.add(order.orderId);
+
+  return {
+    ok: true,
+    data: { orderId: order.orderId, status: order.status, fills },
+  };
+};
