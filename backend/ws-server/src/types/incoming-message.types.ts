@@ -1,3 +1,4 @@
 export interface IncomingMessage {
-  method: "PING";
+  method: "SUBSCRIBE" | "UNSUBSCRIBE" | "PING";
+  params?: string[];
 }
