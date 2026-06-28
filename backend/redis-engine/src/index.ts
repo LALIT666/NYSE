@@ -236,7 +236,7 @@ interface Trade {
 
 const marketTrades = new Map<Market, Trade[]>();
 
-const handleTicker = (data: { market: Market }): EngineResponse => {
+const handleGetTicker = (data: { market: Market }): EngineResponse => {
   const mTrades = marketTrades.get(data.market) ?? [];
 
   const cutoff = Date.now() - 24 * 60 * 60 * 1000;
@@ -469,4 +469,111 @@ const handleCreateOrder = (data: any): EngineResponse => {
     ok: true,
     data: { orderId: order.orderId, status: order.status, fills },
   };
+};
+
+//!part 8th
+
+type IncomingMessage =
+  | {
+      type: "CREATE_ORDER";
+      clientId: string;
+      data: {
+        userId: string;
+        kind: OrderKind;
+        orderType: OrderType;
+        price: number;
+        quantity: number;
+        market: Market;
+      };
+    }
+  | {
+      type: "CANCEL_ORDER";
+      clientId: string;
+      data: { userId: string; orderId: string };
+    }
+  | {
+      type: "GET_ORDER";
+      clientId: string;
+      data: { userId: string; orderId: string };
+    }
+  | {
+      type: "GET_OPEN_ORDERS";
+      clientId: string;
+      data: { userId: string };
+    }
+  | {
+      type: "GET_ORDER_HISTORY";
+      clientId: string;
+      data: { userId: string };
+    }
+  | {
+      type: "GET_DEPTH";
+      clientId: string;
+      data: { market: Market };
+    }
+  | {
+      type: "GET_TICKER";
+      clientId: string;
+      data: { market: Market };
+    }
+  | {
+      type: "GET_TRADES";
+      clientId: string;
+      data: { market: Market };
+    }
+  | {
+      type: "GET_USER_TRADES";
+      clientId: string;
+      data: { userId: string };
+    }
+  | {
+      type: "GET_BALANCE";
+      clientId: string;
+      data: { userId: string };
+    }
+  | {
+      type: "DEPOSIT";
+      clientId: string;
+      data: { userId: string; asset: Asset; amount: number };
+    }
+  | {
+      type: "WITHDRAW";
+      clientId: string;
+      data: { userId: string; asset: Asset; amount: number };
+    }
+  | {
+      type: "INIT_BALANCE";
+      clientId: string;
+      data: { userId: string };
+    };
+
+const processMessage = (msg: IncomingMessage): EngineResponse => {
+  switch (msg.type) {
+    case "INIT_BALANCE":
+      return handleInitBalance(msg.data);
+    case "GET_BALANCE":
+      return handleGetBalance(msg.data);
+    case "DEPOSIT":
+      return handleDeposit(msg.data);
+    case "WITHDRAW":
+      return handleWithdraw(msg.data);
+    case "GET_ORDER":
+      return handleGetOrder(msg.data);
+    case "GET_OPEN_ORDERS":
+      return handleGetOpenOrders(msg.data);
+    case "GET_ORDER_HISTORY":
+      return handleGetOrderHistory(msg.data);
+    case "GET_DEPTH":
+      return handleGetDepth(msg.data);
+    case "GET_TICKER":
+      return handleGetTicker(msg.data);
+    case "GET_TRADES":
+      return handleGetTrades(msg.data);
+    case "CANCEL_ORDER":
+      return handleCancelOrder(msg.data);
+    case "CREATE_ORDER":
+      return handleCreateOrder(msg.data);
+    default:
+      return { ok: false, message: "Invalid action" };
+  }
 };
