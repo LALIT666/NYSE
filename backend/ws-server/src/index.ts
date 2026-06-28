@@ -3,6 +3,7 @@ import { WS_PORT } from "./config/ws.config";
 import { v4 as uuidv4 } from "uuid";
 import type { Client } from "./types/client.types";
 import { clients } from "./storage/clients.storage";
+import { sendToClient } from "./helpers/send-to-client.helper";
 
 const wss = new WebSocketServer({ port: WS_PORT });
 
@@ -17,6 +18,14 @@ wss.on("connection", (ws: WebSocket) => {
   clients.set(connectionId, client);
 
   console.log(`✅ Client connected: ${connectionId} (total: ${clients.size})`);
+
+  sendToClient(client, {
+    type: "subscribed",
+    data: {
+      connectionId,
+      message: "Connected to exchange WS",
+    },
+  });
 });
 
 console.log(`🚀 Websocket server running on ws://localhost:${WS_PORT}`);
