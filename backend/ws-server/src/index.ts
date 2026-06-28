@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import type { Client } from "./types/client.types";
 import { clients } from "./storage/clients.storage";
 import { sendToClient } from "./helpers/send-to-client.helper";
+import { handleClientMessage } from "./handlers/handle-client-message.handler";
 
 const wss = new WebSocketServer({ port: WS_PORT });
 
@@ -25,6 +26,10 @@ wss.on("connection", (ws: WebSocket) => {
       connectionId,
       message: "Connected to exchange WS",
     },
+  });
+
+  ws.on("message", (raw: Buffer) => {
+    handleClientMessage(client, raw.toString());
   });
 });
 
