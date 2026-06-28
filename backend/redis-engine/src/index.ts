@@ -329,3 +329,90 @@ const settleTrade = (
   sellerBal.assets.get(base)!.locked -= qty;
   sellerBal.assets.get(quote)!.available += cost;
 };
+
+interface Fill {
+  price: number;
+  quantity: number;
+  tradeId: string;
+}
+const trades: Trade[] = [];
+
+const matchOrder = (incoming: Order): Fill[] => {
+  const fills: Fill[] = [];
+  const oppositeKind = incoming.kind === "buy" ? "sell" : "buy";
+
+  const candidates: Order[] = [];
+
+  orders.forEach((o) => {
+    if (
+      o.market !== incoming.market ||
+      o.kind !== oppositeKind ||
+      (o.status !== "pending" && o.status !== "partial") ||
+      o.userId === incoming.userId
+    )
+      return;
+
+    if (incoming.kind === "buy" && incoming.price >= o.price)
+      candidates.push(o);
+    else if (incoming.kind === "sell" && incoming.price <= o.price)
+      candidates.push(o);
+  });
+
+  candidates.sort((a, b) =>
+    incoming.kind === "buy" ? a.price - b.price : b.price - a.price,
+  );
+
+  for (const counter of candidates) {
+    const neededQty = incoming.quantity - incoming.filledQuantity;
+
+    if (neededQty <= 0) break;
+
+    const availableCounterQty = counter.quantity - counter.filledQuantity;
+    const tradeQty = Math.min(neededQty, availableCounterQty);
+    const tradePrice = counter.price;
+
+    incoming.filledQuantity += tradeQty;
+    counter.filledQuantity += tradeQty;
+    counter.status =
+      counter.filledQuantity === counter.quantity ? "filled" : "partial";
+
+    counter.updatedAt = new Date();
+
+    const trade: Trade = {
+      tradeId: uuidv4(),
+      market: incoming.market,
+      price: tradePrice,
+      quantity: tradeQty,
+
+      buyerUserId: incoming.kind === "buy" ? incoming.userId : counter.userId,
+
+      sellerUserId: incoming.kind === "sell" ? incoming.userId : counter.userId,
+
+      buyOrderId: incoming.kind === "buy" ? incoming.orderId : counter.orderId,
+
+      sellOrderId:
+        incoming.kind === "sell" ? incoming.orderId : counter.orderId,
+
+      timestamp: new Date(),
+    };
+
+    trades.push(trade);
+    marketTrades.get(incoming.market)!.push(trade);
+
+    settleTrade(
+      incoming.kind === "buy" ? incoming : counter,
+      incoming.kind === "sell" ? incoming : counter,
+      tradeQty,
+      tradePrice,
+      incoming.market,
+    );
+
+    fills.push({
+      price: tradePrice,
+      quantity: tradeQty,
+      tradeId: trade.tradeId,
+    });
+  }
+
+  return fills;
+};
