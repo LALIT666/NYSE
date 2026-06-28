@@ -1,6 +1,6 @@
 import { assert } from "node:console";
-import { balances } from "../data/in-memory-database";
-import type { Asset, Balance, UserBalance } from "../types-interfaces/types";
+import { balances } from "../storage/in-memory-database";
+import type { Asset, Balance, UserBalance } from "../types/types";
 
 export const initBalance = (userId: string): UserBalance => {
   const userBalance: UserBalance = {

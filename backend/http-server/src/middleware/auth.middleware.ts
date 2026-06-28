@@ -1,7 +1,7 @@
 import type { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config/config";
-import type { AuthRequest, JwtPayload } from "../types-interfaces/types";
+import { JWT_SECRET } from "../config/app.config";
+import type { AuthRequest, JwtPayload } from "../types/auth.types";
 
 export const authMiddleware = (
   req: AuthRequest,
@@ -18,9 +18,9 @@ export const authMiddleware = (
   const token = authHeader.split(" ")[1];
 
   try {
-    const decode = jwt.verify(token!, JWT_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token!, JWT_SECRET) as JwtPayload;
 
-    req.user = decode;
+    req.user = decoded;
 
     next();
   } catch {

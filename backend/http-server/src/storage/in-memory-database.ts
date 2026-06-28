@@ -5,7 +5,7 @@ import type {
   Trade,
   User,
   UserBalance,
-} from "../types-interfaces/types";
+} from "../types/types";
 
 export const users = new Map<string, User>();
 

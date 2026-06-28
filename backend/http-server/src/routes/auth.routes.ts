@@ -1,27 +1,20 @@
-import type { AuthRequest, User } from "./../types-interfaces/types";
+// Signup, Signin aur Profile dekhne ke routes
 
-import { Router } from "express";
-import type { Request, Response } from "express";
-
+import { Router, type Request, type Response } from "express";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
-import {
-  SigninSchema,
-  SignupSchema,
-  type SigninInput,
-} from "../zod-schemas/zod";
-import { usersById, users } from "../data/in-memory-database";
-import { initBalance } from "../helper/helpers";
-import { type JwtPayload } from "jsonwebtoken";
-import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config/config";
+import { JWT_SECRET } from "../config/app.config";
+import { SignupSchema, SigninSchema } from "../schemas/auth.schema";
+import { users, usersById } from "../storage/users.storage";
+import { sendAndWait } from "../redis/send-and-wait";
 import { authMiddleware } from "../middleware/auth.middleware";
+import type { User } from "../types/user.types";
+import type { JwtPayload, AuthRequest } from "../types/auth.types";
 
 const router = Router();
 
-//Sign up route
-
-router.post("/singup", async (req: Request, res: Response): Promise<void> => {
+router.post("/signup", async (req: Request, res: Response): Promise<void> => {
   const parsed = SignupSchema.safeParse(req.body);
 
   if (!parsed.success) {
@@ -29,7 +22,6 @@ router.post("/singup", async (req: Request, res: Response): Promise<void> => {
       message: "Invalid input",
       errors: parsed.error.issues,
     });
-
     return;
   }
 
@@ -39,7 +31,6 @@ router.post("/singup", async (req: Request, res: Response): Promise<void> => {
     res.status(409).json({ message: "User already exists" });
     return;
   }
-
   const passwordHash = await bcrypt.hash(password, 10);
 
   const newUser: User = {
@@ -50,10 +41,9 @@ router.post("/singup", async (req: Request, res: Response): Promise<void> => {
   };
 
   users.set(email, newUser);
-
   usersById.set(newUser.userId, newUser);
 
-  initBalance(newUser.userId);
+  await sendAndWait("INIT_BALANCE", { userId: newUser.userId });
 
   res.status(201).json({
     message: "User created",
@@ -61,9 +51,7 @@ router.post("/singup", async (req: Request, res: Response): Promise<void> => {
   });
 });
 
-//Sign in
-
-router.post("/sigin", async (req: Request, res: Response): Promise<void> => {
+router.post("/signin", async (req: Request, res: Response): Promise<void> => {
   const parsed = SigninSchema.safeParse(req.body);
 
   if (!parsed.success) {
@@ -74,7 +62,7 @@ router.post("/sigin", async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  const { email, password }: SigninInput = parsed.data;
+  const { email, password } = parsed.data;
 
   const user = users.get(email);
 
@@ -86,9 +74,7 @@ router.post("/sigin", async (req: Request, res: Response): Promise<void> => {
   const ok = await bcrypt.compare(password, user.passwordHash);
 
   if (!ok) {
-    res
-      .status(401)
-      .json({ message: "Ivalid credentials(password is invalid)" });
+    res.status(401).json({ message: "Invalid credentials" });
     return;
   }
 
@@ -101,8 +87,6 @@ router.post("/sigin", async (req: Request, res: Response): Promise<void> => {
 
   res.json({ token });
 });
-
-//Route 3: GET /api/v1/auth/me
 
 router.get("/me", authMiddleware, (req: AuthRequest, res: Response): void => {
   const user = usersById.get(req.user!.userId);

@@ -1,32 +1,41 @@
+// Main entry file - sab kuch yahan jod ke server start karo
+
 import express from "express";
-import { PORT } from "./config/config";
+import { PORT } from "./config/app.config";
+import { publisher, subscriber } from "./redis/redis.clients";
+
+// Saare route files import karo
 import authRoutes from "./routes/auth.routes";
 import balanceRoutes from "./routes/balance.routes";
+import orderRoutes from "./routes/order.routes";
 import marketRoutes from "./routes/market.routes";
 import userRoutes from "./routes/user.routes";
-
-import orderRoutes from "./routes/orders.routes";
 
 const app = express();
 
 app.use(express.json());
 
-app.get("/api/v1/healthy", (req, res) => {
-  console.log("user is on this route -- api/v1/healthy");
-  res.json({
-    status: 200,
-    success: true,
-    route: "🏥 api/v1/healthy",
-    message: "✅ Http-Server is healthy",
-  });
-});
-
 app.use("/api/v1/auth", authRoutes);
+
 app.use("/api/v1/balance", balanceRoutes);
+
 app.use("/api/v1/order", orderRoutes);
+
 app.use("/api/v1", marketRoutes);
+
 app.use("/api/v1/user", userRoutes);
 
-app.listen(PORT, () => {
-  console.log(`🚀 Exchange API running on http://localhost:${PORT}`);
+const start = async (): Promise<void> => {
+  await publisher.connect();
+  await subscriber.connect();
+  console.log("✅ Redis connected (publisher + subscriber)");
+
+  app.listen(PORT, () => {
+    console.log(`🚀 API Server running on http://localhost:${PORT}`);
+  });
+};
+
+start().catch((err) => {
+  console.error("Fatal startup error:", err);
+  process.exit(1);
 });

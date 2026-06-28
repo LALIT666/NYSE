@@ -1,83 +1,81 @@
-import { assert } from "node:console";
+// Balance dekhna, deposit karna, withdraw karna
+
 import { Router, type Response } from "express";
-import type { AuthRequest } from "../types-interfaces/types";
-import { getUserBalance, serializeBalance } from "../helper/helpers";
-import { balances } from "../data/in-memory-database";
 import { authMiddleware } from "../middleware/auth.middleware";
-import {
-  DepositSchema,
-  WithdrawSchema,
-  type DepositInput,
-  type WithdrawInput,
-} from "../zod-schemas/zod";
+import { DepositSchema, WithdrawSchema } from "../schemas/balance.schema";
+import { sendAndWait } from "../redis/send-and-wait";
+import type { AuthRequest } from "../types/auth.types";
 
 const router = Router();
 
 router.use(authMiddleware);
 
-//router 4: GET /api/v1/balance
+router.get("/", async (req: AuthRequest, res: Response): Promise<void> => {
+  const result = await sendAndWait("GET_BALANCE", {
+    userId: req.user!.userId,
+  });
 
-router.get("/", (req: AuthRequest, res: Response): void => {
-  const ub = getUserBalance(req.user!.userId);
+  if (!result.ok) {
+    res.status(400).json({ message: result.message });
+    return;
+  }
 
-  res.json({ balances: serializeBalance(ub) });
+  res.json(result.data);
 });
 
-//router 5: POST /api/v1/balance/deposit
+router.post(
+  "/deposit",
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    const parsed = DepositSchema.safeParse(req.body);
 
-router.post("/deposit", (req: AuthRequest, res: Response): void => {
-  const parsed = DepositSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({
+        message: "Invalid input",
+        errors: parsed.error.issues,
+      });
+      return;
+    }
 
-  if (!parsed.success) {
-    res.status(400).json({
-      message: "Invalid input",
-      errors: parsed.error.issues,
+    const result = await sendAndWait("DEPOSIT", {
+      userId: req.user!.userId,
+      asset: parsed.data.asset,
+      amount: parsed.data.amount,
     });
 
-    return;
-  }
+    if (!result.ok) {
+      res.status(400).json({ message: result.message });
+      return;
+    }
 
-  const { asset, amount }: DepositInput = parsed.data;
+    res.json({ message: "Deposit successful", ...(result.data as object) });
+  },
+);
+router.post(
+  "/withdraw",
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    const parsed = WithdrawSchema.safeParse(req.body);
 
-  const ub = getUserBalance(req.user!.userId);
+    if (!parsed.success) {
+      res.status(400).json({
+        message: "Invalid input",
+        errors: parsed.error.issues,
+      });
+      return;
+    }
 
-  const current = ub.assets.get(asset)!;
-
-  current.available += amount;
-
-  ub.assets.set(asset, current);
-
-  res.json({ message: "Deposit successful", balance: current });
-});
-
-//Route 6: POST /api/v1/balance/withdraw
-router.post("/withdraw", (req: AuthRequest, res: Response): void => {
-  const parsed = WithdrawSchema.safeParse(req.body);
-
-  if (!parsed.success) {
-    res.status(400).json({
-      message: "Invalid input",
-      errors: parsed.error.issues,
+    const result = await sendAndWait("WITHDRAW", {
+      userId: req.user!.userId,
+      asset: parsed.data.asset,
+      amount: parsed.data.amount,
     });
 
-    return;
-  }
+    if (!result.ok) {
+      res.status(400).json({ message: result.message });
+      return;
+    }
 
-  const { asset, amount }: WithdrawInput = parsed.data;
-
-  const ub = getUserBalance(req.user!.userId);
-  const current = ub.assets.get(asset)!; //! --> this because current may be possible undefine
-
-  if (current.available < amount) {
-    res.status(400).json({ message: "Insufficient balance" });
-    return;
-  }
-
-  current.available -= amount;
-
-  ub.assets.set(asset, current);
-
-  res.json({ message: "Withdraw successfull", balance: current });
-});
+    res.json({ message: "Withdraw successful", ...(result.data as object) });
+  },
+);
 
 export default router;
