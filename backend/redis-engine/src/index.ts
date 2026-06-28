@@ -1,3 +1,4 @@
+import { marketAssets } from "./../../http-server/src/data/in-memory-database";
 //I am building redis using only one file beacause my mind get boggles while i use multiple files
 import { createClient, type RedisClientType } from "redis";
 
@@ -262,4 +263,37 @@ const handleGetTrades = (data: { market: Market }): EngineResponse => {
   const mTrades = marketTrades.get(data.market) ?? [];
 
   return { ok: true, data: { trades: mTrades.slice(-50).reverse() } };
+};
+
+//! 6th part
+
+const handleCancelOrder = (data: {
+  userId: string;
+  orderId: string;
+}): EngineResponse => {
+  const order = orders.get(data.orderId);
+  if (!order) return { ok: false, message: "Order not found" };
+  if (order.userId !== data.userId) return { ok: false, message: "forbidden" };
+
+  if (order.status === "filled" || order.status === "cancelled")
+    return { ok: false, message: "Order already closed" };
+
+  const ub = getBalance(order.userId);
+  const { base, quote } = marketAssets[order.market];
+  const remainingQty = order.quantity - order.filledQuantity;
+
+  if (order.kind === "buy") {
+    const qb = ub.assets.get(quote)!;
+    const unlockAmount = remainingQty * order.price;
+    qb.locked -= unlockAmount;
+    qb.available += unlockAmount;
+  } else {
+    const bb = ub.assets.get(base)!;
+    bb.locked -= remainingQty;
+    bb.available += remainingQty;
+  }
+
+  order.status = "cancelled";
+  order.updatedAt = new Date();
+  return { ok: true, data: { orderid: order.orderId, status: "cancelled" } };
 };
