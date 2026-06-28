@@ -577,3 +577,28 @@ const processMessage = (msg: IncomingMessage): EngineResponse => {
       return { ok: false, message: "Invalid action" };
   }
 };
+
+//main function
+
+const main = async () => {
+  const client: RedisClientType = createClient({ url: REDIS_URL });
+  await client.connect();
+  console.log("🚀 Engine is READY -- Redis client connected");
+
+  while (true) {
+    const res = await client.brPop(MESSAGES_QUEUE, 0);
+    if (!res) continue;
+
+    const msg = JSON.parse(res.element);
+
+    const reply = processMessage(msg);
+
+    const replyQueue = `response-${msg.clientId}`;
+
+    await client.lPush(replyQueue, JSON.stringify(reply));
+
+    await client.expire(replyQueue, 30);
+  }
+};
+
+main();
