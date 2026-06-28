@@ -14,6 +14,7 @@ wss.on("connection", (ws: WebSocket) => {
   const client: Client = {
     id: connectionId,
     ws,
+    subscriptions: new Set(),
   };
 
   clients.set(connectionId, client);
