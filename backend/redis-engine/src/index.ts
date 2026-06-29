@@ -1,10 +1,13 @@
 import { client } from "./redis/main.client";
+import { publisher } from "./redis/publisher.client";
 import { MESSAGES_QUEUE } from "./config/redis.config";
-import type { EngineResponse } from "./types/engine-response.types";
+import { processMessage } from "./router/process-message.router";
+import type { IncomingMessage } from "./types/incoming-message.types";
 
 const main = async (): Promise<void> => {
   await client.connect();
-  console.log("✅ Redis connected");
+  await publisher.connect();
+  console.log("✅ Redis connected (main + publisher)");
   console.log("🚀 Engine started, waiting for messages...");
 
   while (true) {
@@ -12,35 +15,21 @@ const main = async (): Promise<void> => {
       const result = await client.brPop(MESSAGES_QUEUE, 0);
       if (!result) continue;
 
-      // Raw string ko JSON me parse karo
-      let msg: { type: string; clientId: string; data: unknown };
+      let msg: IncomingMessage;
 
       try {
-        msg = JSON.parse(result.element);
+        msg = JSON.parse(result.element) as IncomingMessage;
       } catch {
-        // Agar galat JSON aaya toh skip karo
         console.error("Invalid JSON:", result.element);
         continue;
       }
 
       console.log(`📨 Received: ${msg.type} (clientId: ${msg.clientId})`);
 
-      // Abhi har message ke liye ek dummy response bhejenge
-      // Baad me actual handlers banayenge
-      const response: EngineResponse = {
-        ok: false,
-        message: "Not implemented yet",
-      };
+      const response = processMessage(msg);
 
-      // Response us client ke specific queue me daalo
-      // "response-{clientId}" = har client ka apna response queue
       const responseQueue = `response-${msg.clientId}`;
-
-      // LPUSH: Queue me response daal do
       await client.lPush(responseQueue, JSON.stringify(response));
-
-      // 30 second baad ye queue automatically delete ho jayega
-      // Taaki memory leak na ho agar koi response uthaye hi nahi
       await client.expire(responseQueue, 30);
 
       console.log(`✅ Responded to ${msg.clientId}`);
