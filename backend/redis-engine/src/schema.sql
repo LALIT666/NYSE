@@ -117,3 +117,11 @@ FROM trades
 GROUP BY market, bucket
 WITH NO DATA;
 
+SELECT add_continuous_aggregate_policy(
+  'klines_1d',
+  start_offset => INTERVAL '30 days',
+  end_offset   => INTERVAL '1 day',
+  schedule_interval => INTERVAL '1 day',
+  if_not_exists => TRUE
+);
+
