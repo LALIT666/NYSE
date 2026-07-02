@@ -19,3 +19,6 @@ SELECT create_hypertable(
   if_not_exists => TRUE
 );
 
+
+CREATE INDEX IF NOT EXISTS idx_trades_market_time
+  ON trades (market, timestamp DESC);
