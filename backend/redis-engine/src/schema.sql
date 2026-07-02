@@ -22,3 +22,20 @@ SELECT create_hypertable(
 
 CREATE INDEX IF NOT EXISTS idx_trades_market_time
   ON trades (market, timestamp DESC);
+
+
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS klines_1m
+WITH (timescaledb.continuous) AS
+SELECT
+  market,                                           -- kaunsa market
+  time_bucket('1 minute', timestamp) AS bucket,     -- 1 minute ka bucket
+  first(price, timestamp)  AS open,                 -- us minute ki first price
+  max(price)               AS high,                 -- us minute ki highest price
+  min(price)               AS low,                  -- us minute ki lowest price
+  last(price, timestamp)   AS close,                -- us minute ki last price
+  sum(quantity)            AS volume,               -- us minute ka total traded qty
+  count(*)                 AS trade_count           -- us minute me kitne trades hue
+FROM trades
+GROUP BY market, bucket
+WITH NO DATA;
