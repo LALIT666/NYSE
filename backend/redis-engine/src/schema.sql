@@ -77,3 +77,20 @@ SELECT add_continuous_aggregate_policy(
 );
 
 
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS klines_1h
+WITH (timescaledb.continuous) AS
+SELECT
+  market,
+  time_bucket('1 hour', timestamp) AS bucket,
+  first(price, timestamp)  AS open,
+  max(price)               AS high,
+  min(price)               AS low,
+  last(price, timestamp)   AS close,
+  sum(quantity)            AS volume,
+  count(*)                 AS trade_count
+FROM trades
+GROUP BY market, bucket
+WITH NO DATA;
+
+
