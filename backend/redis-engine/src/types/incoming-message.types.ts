@@ -2,6 +2,7 @@
 // Discriminated Union = TypeScript har case ke liye sahi data type enforce karega
 
 import type { Asset } from "./balance.types";
+import type { KlineInterval } from "./kline.types";
 import type { OrderKind, OrderType, Market } from "./order.types";
 
 export type IncomingMessage =
@@ -44,4 +45,15 @@ export type IncomingMessage =
       clientId: string;
       data: { userId: string; asset: Asset; amount: number };
     }
-  | { type: "INIT_BALANCE"; clientId: string; data: { userId: string } };
+  | { type: "INIT_BALANCE"; clientId: string; data: { userId: string } }
+  | {
+      type: "GET_KLINES";
+      clientId: string;
+      data: {
+        market: Market;
+        interval: KlineInterval;
+        startTime?: string; // ISO string
+        endTime?: string;
+        limit?: number;
+      };
+    };
