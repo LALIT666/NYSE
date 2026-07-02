@@ -10,6 +10,8 @@ import { v4 as uuidv4 } from "uuid";
 import { createClient, type RedisClientType } from "redis";
 import { getPrisma } from "db";
 
+import cors from "cors";
+
 // ==================== CONFIG ====================
 const PORT = 3000;
 const JWT_SECRET = "super-secret-key-change-in-env";
@@ -109,6 +111,14 @@ const sendAndWait = async <T = unknown>(
 
 // ==================== APP SETUP ====================
 const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
 // ==================== MIDDLEWARE ====================
