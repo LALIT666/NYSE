@@ -65,3 +65,15 @@ SELECT
 FROM trades
 GROUP BY market, bucket
 WITH NO DATA;
+
+
+
+SELECT add_continuous_aggregate_policy(
+  'klines_5m',
+  start_offset => INTERVAL '6 hours',
+  end_offset   => INTERVAL '5 minutes',
+  schedule_interval => INTERVAL '5 minutes',
+  if_not_exists => TRUE
+);
+
+
