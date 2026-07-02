@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
+export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -9,14 +9,13 @@ function Login() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log("Login attempt:", email, password);
+    console.log("Signup attempt:", email, password);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="bg-[#18181b] p-8 rounded-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">Create Account</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -38,31 +37,30 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-3 rounded bg-[#0e0e10] border border-[#2a2a2e] text-white"
-              placeholder="••••••"
+              placeholder="Min 6 characters"
+              minLength={6}
               required
             />
           </div>
 
           <button
             type="submit"
-            className="w-full p-3 bg-blue-600 hover:bg-blue-700 rounded font-semibold"
+            className="w-full p-3 bg-green-600 hover:bg-green-700 rounded font-semibold"
           >
-            Sign In
+            Create Account
           </button>
         </form>
 
         <p className="text-center text-gray-400 mt-4 text-sm">
-          Don't have an account?{" "}
+          Already have an account?{" "}
           <span
             className="text-blue-500 cursor-pointer"
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate("/login")}
           >
-            Sign Up
+            Sign In
           </span>
         </p>
       </div>
     </div>
   );
 }
-
-export default Login;
