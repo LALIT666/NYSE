@@ -94,3 +94,11 @@ GROUP BY market, bucket
 WITH NO DATA;
 
 
+SELECT add_continuous_aggregate_policy(
+  'klines_1h',
+  start_offset => INTERVAL '7 days',
+  end_offset   => INTERVAL '1 hour',
+  schedule_interval => INTERVAL '1 hour',
+  if_not_exists => TRUE
+);
+
