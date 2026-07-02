@@ -2,7 +2,7 @@ import { pgPool } from "../postgres/postgres.pool";
 import type { Trade } from "../types/trade.types";
 
 // Helper: trade ko DB me save karo
-const persistTrade = async (trade: Trade): Promise<void> => {
+export const persistTrade = async (trade: Trade): Promise<void> => {
   try {
     await pgPool.query(
       `INSERT INTO trades 

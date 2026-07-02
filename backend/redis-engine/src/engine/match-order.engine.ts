@@ -9,6 +9,7 @@ import { orders } from "../storage/orders.storage";
 import { trades, marketTrades } from "../storage/trades.storage";
 import { settleTrade } from "./settle-trade.engine";
 import { publishEvent } from "../helpers/publish-event.helper";
+import { persistTrade } from "../helpers/persist-trade.helper";
 
 export const matchOrder = (incoming: Order): Fill[] => {
   const fills: Fill[] = [];
@@ -101,6 +102,9 @@ export const matchOrder = (incoming: Order): Fill[] => {
     // Trade save karo dono storage me
     trades.push(trade);
     marketTrades.get(incoming.market)!.push(trade);
+
+    // 💾 Persist to TimescaleDB (async, non-blocking)
+    void persistTrade(trade);
 
     // Balance settle karo (paisa transfer)
     settleTrade(buyOrder, sellOrder, fillQty, fillPrice, incoming.market);
