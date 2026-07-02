@@ -39,3 +39,14 @@ SELECT
 FROM trades
 GROUP BY market, bucket
 WITH NO DATA;
+
+
+
+SELECT add_continuous_aggregate_policy(
+  'klines_1m',
+  start_offset => INTERVAL '1 hour',
+  end_offset   => INTERVAL '1 minute',
+  schedule_interval => INTERVAL '1 minute',
+  if_not_exists => TRUE
+);
+
