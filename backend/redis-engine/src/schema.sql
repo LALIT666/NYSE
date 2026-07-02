@@ -11,3 +11,11 @@ CREATE TABLE IF NOT EXISTS trades (
   sell_order  TEXT NOT NULL,                 -- sell order id
   timestamp   TIMESTAMPTZ NOT NULL DEFAULT NOW() -- trade kab hua
 );
+
+
+SELECT create_hypertable(
+  'trades',
+  'timestamp',
+  if_not_exists => TRUE
+);
+
