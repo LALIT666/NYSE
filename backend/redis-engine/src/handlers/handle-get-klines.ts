@@ -4,7 +4,7 @@ import type { EngineResponse } from "../types/engine-response.types";
 import type { IncomingMessage } from "../types/incoming-message.types";
 import type { Kline, KlineInterval } from "../types/kline.types";
 
-const handleGetKlines = async (
+export const handleGetKlines = async (
   data: Extract<IncomingMessage, { type: "GET_KLINES" }>["data"],
 ): Promise<EngineResponse> => {
   const { market, interval, startTime, endTime, limit = 100 } = data;

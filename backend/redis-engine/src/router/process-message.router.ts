@@ -13,9 +13,12 @@ import { handleGetTrades } from "../handlers/handle-get-trades.handler";
 import { handleGetUserTrades } from "../handlers/handle-get-user-trades.handler";
 import { handleCancelOrder } from "../handlers/handle-cancel-order.handler";
 import { handleCreateOrder } from "../handlers/handle-create-order.handler";
+import { handleGetKlines } from "../handlers/handle-get-klines";
 
 // Ab msg properly typed hai - TypeScript har case me sahi data type enforce karega
-export const processMessage = (msg: IncomingMessage): EngineResponse => {
+export const processMessage = async (
+  msg: IncomingMessage,
+): Promise<EngineResponse> => {
   switch (msg.type) {
     case "INIT_BALANCE":
       return handleInitBalance(msg.data);
@@ -43,6 +46,8 @@ export const processMessage = (msg: IncomingMessage): EngineResponse => {
       return handleCancelOrder(msg.data);
     case "CREATE_ORDER":
       return handleCreateOrder(msg.data);
+    case "GET_KLINES":
+      return await handleGetKlines(msg.data);
     default: {
       // Exhaustive check:
       // Agar koi naya type IncomingMessage me add kiya
