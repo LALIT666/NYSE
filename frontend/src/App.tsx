@@ -19,7 +19,6 @@ function App() {
 
   useEffect(() => {
     loadFromStorage();
-
     wsManager.connect();
   }, [loadFromStorage]);
 
@@ -35,7 +34,6 @@ function App() {
           },
         }}
       />
-
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

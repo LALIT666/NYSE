@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Chart from "../components/Chart";
 import Orderbook from "../components/Orderbook";
 import OrderForm from "../components/OrderForm";
 import Balance from "../components/Balance";
@@ -26,27 +27,19 @@ function Trade() {
 
     setMarket(market as Market);
 
-    // Initial data fetch (ek baar REST se)
     fetchDepth(market as Market);
     fetchBalances();
     fetchRecentTrades(market as Market);
     fetchOpenOrders();
 
-    // WebSocket subscribe karo real-time updates ke liye
-
-    // Depth updates — orderbook change hoga toh aayega
     const unsubDepth = wsManager.subscribe(`depth@${market}`, (data) => {
-      // Engine se naya depth data aaya — store me update karo
       setDepth(data as Depth);
     });
 
-    // Trade updates — naya trade hoga toh aayega
     const unsubTrades = wsManager.subscribe(`trades@${market}`, (data) => {
-      // Naya trade add karo list me
       addTrade(data as TradeType);
     });
 
-    // Cleanup: component unmount pe unsubscribe karo
     return () => {
       unsubDepth();
       unsubTrades();
@@ -70,12 +63,10 @@ function Trade() {
         <h1 className="text-xl font-bold mb-4">{market}</h1>
 
         <div className="grid grid-cols-12 gap-4">
-          {/* Chart */}
-          <div className="col-span-8 bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4 h-96">
-            <p className="text-gray-400">Chart coming soon...</p>
+          <div className="col-span-8">
+            <Chart market={market as Market} />
           </div>
 
-          {/* Right sidebar */}
           <div className="col-span-4 space-y-4">
             <div className="bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4 h-72">
               <Orderbook />
@@ -90,12 +81,10 @@ function Trade() {
             </div>
           </div>
 
-          {/* Bottom left — Recent Trades */}
           <div className="col-span-4 bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
             <RecentTrades />
           </div>
 
-          {/* Bottom right — My Orders */}
           <div className="col-span-8 bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
             <MyOrders />
           </div>
