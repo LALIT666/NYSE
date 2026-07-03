@@ -4,6 +4,11 @@ WORKDIR /app
 FROM base AS deps
 COPY backend/db ./backend/db
 COPY backend/http-server/package.json ./backend/http-server/
+
+WORKDIR /app/backend/db
+RUN bun install
+RUN bunx prisma generate
+
 WORKDIR /app/backend/http-server
 RUN bun install
 

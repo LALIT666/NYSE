@@ -4,6 +4,11 @@ WORKDIR /app
 FROM base AS deps
 COPY backend/db ./backend/db
 COPY backend/redis-engine/package.json ./backend/redis-engine/
+
+WORKDIR /app/backend/db
+RUN bun install
+RUN bunx prisma generate
+
 WORKDIR /app/backend/redis-engine
 RUN bun install
 
