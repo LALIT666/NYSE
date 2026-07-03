@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Orderbook from "../components/Orderbook";
 import OrderForm from "../components/OrderForm";
 import Balance from "../components/Balance";
+import RecentTrades from "../components/RecentTrades";
 import { useMarketStore } from "../store/marketStore";
 import type { Market } from "../types";
 
@@ -12,6 +13,7 @@ function Trade() {
 
   const fetchDepth = useMarketStore((s) => s.fetchDepth);
   const fetchBalances = useMarketStore((s) => s.fetchBalances);
+  const fetchRecentTrades = useMarketStore((s) => s.fetchRecentTrades);
   const setMarket = useMarketStore((s) => s.setMarket);
 
   useEffect(() => {
@@ -20,13 +22,15 @@ function Trade() {
     setMarket(market as Market);
     fetchDepth(market as Market);
     fetchBalances();
+    fetchRecentTrades(market as Market);
 
     const interval = setInterval(() => {
       fetchDepth(market as Market);
+      fetchRecentTrades(market as Market);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [market, fetchDepth, fetchBalances, setMarket]);
+  }, [market, fetchDepth, fetchBalances, fetchRecentTrades, setMarket]);
 
   return (
     <div className="min-h-screen">
@@ -54,8 +58,12 @@ function Trade() {
             </div>
           </div>
 
-          <div className="col-span-12 bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
-            <p className="text-gray-400">Orders & trades coming soon...</p>
+          <div className="col-span-4 bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
+            <RecentTrades />
+          </div>
+
+          <div className="col-span-8 bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
+            <p className="text-gray-400">My orders coming soon...</p>
           </div>
         </div>
       </div>
