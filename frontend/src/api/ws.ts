@@ -88,5 +88,3 @@ class WebSocketManager {
 
 const WS_URL = import.meta.env.VITE_WS_URL ?? "ws://localhost:3001";
 export const wsManager = new WebSocketManager(WS_URL);
-git add .
-git commit -m "fix: remove unused reconnectTimer from websocket manager"
