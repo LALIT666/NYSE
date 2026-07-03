@@ -122,14 +122,14 @@ const Chart = ({ market }: ChartProps) => {
       const intervalMs = getIntervalMs(interval);
       const tradeTime = new Date(trade.timestamp).getTime();
       const bucketTime = Math.floor(tradeTime / intervalMs) * intervalMs;
-      const bucketSec = (bucketTime / 1000) as Time;
+      const bucketSec = bucketTime / 1000;
 
       const lastCandle = klines[klines.length - 1];
       const lastBucketSec = new Date(lastCandle.bucket).getTime() / 1000;
 
       if (bucketSec === lastBucketSec) {
         seriesRef.current.update({
-          time: bucketSec,
+          time: bucketSec as Time,
           open: lastCandle.open,
           high: Math.max(lastCandle.high, trade.price),
           low: Math.min(lastCandle.low, trade.price),
@@ -137,7 +137,7 @@ const Chart = ({ market }: ChartProps) => {
         });
       } else if (bucketSec > lastBucketSec) {
         seriesRef.current.update({
-          time: bucketSec,
+          time: bucketSec as Time,
           open: trade.price,
           high: trade.price,
           low: trade.price,
