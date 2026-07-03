@@ -12,9 +12,14 @@ export interface Depth {
 
 export interface Trade {
   tradeId: string;
+  market: Market;
   price: number;
   quantity: number;
   timestamp: string;
+  buyerUserId: string;
+  sellerUserId: string;
+  buyOrderId: string;
+  sellOrderId: string;
 }
 
 export interface Order {
@@ -26,6 +31,8 @@ export interface Order {
   filledQuantity: number;
   market: Market;
   status: OrderStatus;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Balance {
@@ -54,6 +61,20 @@ export interface Kline {
   trade_count: number;
 }
 
+export interface PlaceOrderResponse {
+  orderId: string;
+  status: OrderStatus;
+  filledQuantity: number;
+  fills: Fill[];
+}
+
+export interface Fill {
+  price: number;
+  quantity: number;
+  tradeId: string;
+  counterOrderId: string;
+}
+
 export interface DepthUpdate {
   bids: [number, number][];
   asks: [number, number][];
@@ -64,4 +85,13 @@ export interface TradeUpdate {
   price: number;
   quantity: number;
   timestamp: string;
+}
+
+export interface OrderUpdate {
+  orderId: string;
+  status: OrderStatus;
+  filledQuantity?: number;
+  quantity?: number;
+  executedQty?: number;
+  executedPrice?: number;
 }
