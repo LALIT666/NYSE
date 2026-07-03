@@ -5,12 +5,11 @@ import { useAuthStore } from "./store/authStore";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Markets from "./pages/Markets";
+import Trade from "./pages/Trade";
 
 function Protected({ children }: { children: React.ReactNode }) {
   const isAuth = useAuthStore((s) => s.isAuthenticated);
-
   if (!isAuth) return <Navigate to="/login" replace />;
-
   return <>{children}</>;
 }
 
@@ -43,6 +42,16 @@ function App() {
           element={
             <Protected>
               <Markets />
+            </Protected>
+          }
+        />
+
+        {/* Trade route — :market URL param hai */}
+        <Route
+          path="/trade/:market"
+          element={
+            <Protected>
+              <Trade />
             </Protected>
           }
         />
