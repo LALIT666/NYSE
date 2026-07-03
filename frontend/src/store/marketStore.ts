@@ -1,6 +1,14 @@
 import { create } from "zustand";
 import { http } from "../api/http";
-import type { Market, Depth, Trade, Order, UserBalances } from "../types";
+import type {
+  Market,
+  Depth,
+  Trade,
+  Order,
+  UserBalances,
+  Kline,
+  KlineInterval,
+} from "../types";
 
 interface MarketState {
   currentMarket: Market;
@@ -19,6 +27,10 @@ interface MarketState {
 
   balances: UserBalances | null;
   fetchBalances: () => Promise<void>;
+
+  klines: Kline[];
+  setKlines: (k: Kline[]) => void;
+  fetchKlines: (market: Market, interval: KlineInterval) => Promise<void>;
 }
 
 export const useMarketStore = create<MarketState>((set) => ({
@@ -52,5 +64,14 @@ export const useMarketStore = create<MarketState>((set) => ({
   fetchBalances: async () => {
     const res = await http.get<{ balances: UserBalances }>("/balance");
     set({ balances: res.data.balances });
+  },
+
+  klines: [],
+  setKlines: (k) => set({ klines: k }),
+  fetchKlines: async (market, interval) => {
+    const res = await http.get<{ klines: Kline[] }>(`/klines/${market}`, {
+      params: { interval, limit: 200 },
+    });
+    set({ klines: res.data.klines });
   },
 }));
