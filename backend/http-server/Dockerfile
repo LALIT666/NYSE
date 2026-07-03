@@ -2,20 +2,20 @@ FROM oven/bun:1.1-alpine AS base
 WORKDIR /app
 
 FROM base AS deps
-COPY backend/httpserver/package.json ./backend/httpserver/
-WORKDIR /app/backend/httpserver
+COPY backend/db ./backend/db
+COPY backend/redis-engine/package.json ./backend/redis-engine/
+WORKDIR /app/backend/redis-engine
 RUN bun install
 
 FROM base AS runner
 WORKDIR /app
 
-COPY --from=deps /app/backend/httpserver/node_modules ./backend/httpserver/node_modules
-COPY backend/httpserver/package.json ./backend/httpserver/
-COPY backend/httpserver/tsconfig.json ./backend/httpserver/
-COPY backend/httpserver/src ./backend/httpserver/src
+COPY --from=deps /app/backend/db ./backend/db
+COPY --from=deps /app/backend/redis-engine/node_modules ./backend/redis-engine/node_modules
+COPY backend/redis-engine/package.json ./backend/redis-engine/
+COPY backend/redis-engine/tsconfig.json ./backend/redis-engine/
+COPY backend/redis-engine/src ./backend/redis-engine/src
 
-WORKDIR /app/backend/httpserver
-
-EXPOSE 3000
+WORKDIR /app/backend/redis-engine
 
 CMD ["bun", "run", "src/index.ts"]

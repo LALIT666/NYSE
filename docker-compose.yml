@@ -54,7 +54,7 @@ services:
   httpserver:
     build:
       context: .
-      dockerfile: backend/httpserver/Dockerfile
+      dockerfile: backend/http-server/Dockerfile
     container_name: exchange-httpserver
     ports:
       - "3000:3000"

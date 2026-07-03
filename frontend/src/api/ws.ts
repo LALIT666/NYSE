@@ -4,11 +4,7 @@ class WebSocketManager {
   private ws: WebSocket | null = null;
   private url: string;
   private handlers = new Map<string, Set<EventHandler>>();
-
   private subscribedChannels = new Set<string>();
-
-  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-
   private isConnecting = false;
 
   constructor(url: string) {
@@ -49,7 +45,7 @@ class WebSocketManager {
       console.log("WS disconnected, reconnecting in 2s...");
       this.isConnecting = false;
       this.ws = null;
-      this.reconnectTimer = setTimeout(() => this.connect(), 2000);
+      setTimeout(() => this.connect(), 2000);
     };
 
     this.ws.onerror = (err) => {
@@ -92,3 +88,5 @@ class WebSocketManager {
 
 const WS_URL = import.meta.env.VITE_WS_URL ?? "ws://localhost:3001";
 export const wsManager = new WebSocketManager(WS_URL);
+git add .
+git commit -m "fix: remove unused reconnectTimer from websocket manager"
