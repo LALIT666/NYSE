@@ -1,37 +1,20 @@
 FROM oven/bun:1.1-alpine AS base
 WORKDIR /app
 
-# ============ Dependencies stage ============
 FROM base AS deps
-# Copy db package first (workspace dependency)
-COPY db/package.json ./db/
-COPY db/prisma ./db/prisma
-COPY db/src ./db/src
-
-# Install db deps + generate Prisma client
-WORKDIR /app/db
-RUN bun install
-RUN bunx prisma generate
-
-# Copy httpserver
-WORKDIR /app/httpserver
-COPY httpserver/package.json ./
+COPY backend/httpserver/package.json ./backend/httpserver/
+WORKDIR /app/backend/httpserver
 RUN bun install
 
-# ============ Production stage ============
 FROM base AS runner
 WORKDIR /app
 
-# Copy db (with generated Prisma client)
-COPY --from=deps /app/db ./db
+COPY --from=deps /app/backend/httpserver/node_modules ./backend/httpserver/node_modules
+COPY backend/httpserver/package.json ./backend/httpserver/
+COPY backend/httpserver/tsconfig.json ./backend/httpserver/
+COPY backend/httpserver/src ./backend/httpserver/src
 
-# Copy httpserver deps + source
-COPY --from=deps /app/httpserver/node_modules ./httpserver/node_modules
-COPY httpserver/package.json ./httpserver/
-COPY httpserver/tsconfig.json ./httpserver/
-COPY httpserver/src ./httpserver/src
-
-WORKDIR /app/httpserver
+WORKDIR /app/backend/httpserver
 
 EXPOSE 3000
 
