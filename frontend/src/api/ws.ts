@@ -90,4 +90,5 @@ class WebSocketManager {
   }
 }
 
-export const wsManager = new WebSocketManager("ws://localhost:3001");
+const WS_URL = import.meta.env.VITE_WS_URL ?? "ws://localhost:3001";
+export const wsManager = new WebSocketManager(WS_URL);

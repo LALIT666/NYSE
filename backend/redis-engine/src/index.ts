@@ -4,15 +4,15 @@ import { Pool } from "pg";
 import { getPrisma } from "db";
 
 // ==================== CONFIG ====================
-const REDIS_URL = "redis://localhost:6379";
+const REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
 const MESSAGES_QUEUE = "messages";
 
 const DB_CONFIG = {
-  host: "localhost",
-  port: 5432,
-  user: "postgres",
-  password: "password",
-  database: "exchange",
+  host: process.env.DB_HOST ?? "localhost",
+  port: Number(process.env.DB_PORT ?? 5432),
+  user: process.env.DB_USER ?? "postgres",
+  password: process.env.DB_PASSWORD ?? "password",
+  database: process.env.DB_NAME ?? "exchange",
 };
 
 // ==================== TYPES ====================

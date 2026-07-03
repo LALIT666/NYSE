@@ -1,1 +1,1 @@
-export const WS_PORT = 3001;
+export const WS_PORT = Number(process.env.PORT ?? 3001);

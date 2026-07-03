@@ -13,9 +13,10 @@ import { getPrisma } from "db";
 import cors from "cors";
 
 // ==================== CONFIG ====================
-const PORT = 3000;
-const JWT_SECRET = "super-secret-key-change-in-env";
-const REDIS_URL = "redis://localhost:6379";
+const PORT = Number(process.env.PORT ?? 3000);
+const JWT_SECRET = process.env.JWT_SECRET ?? "super-secret-key-change-in-env";
+const REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
+const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
 const MESSAGES_QUEUE = "messages";
 const RESPONSE_TIMEOUT = 5;
 
@@ -114,7 +115,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: FRONTEND_URL,
     credentials: true,
   }),
 );
