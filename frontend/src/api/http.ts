@@ -28,6 +28,8 @@ http.interceptors.response.use(
   (err) => {
     if (err.response?.status === 401) {
       localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("email");
       window.localStorage.href = "/login";
     }
 

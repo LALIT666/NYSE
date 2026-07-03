@@ -1,15 +1,29 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
+import toast from "react-hot-toast";
 
-export default function Signup() {
+function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const signup = useAuthStore((s) => s.signup);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Signup attempt:", email, password);
+    setLoading(true);
+
+    try {
+      await signup(email, password);
+      toast.success("Account created!");
+      navigate("/markets");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Signup failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,9 +59,10 @@ export default function Signup() {
 
           <button
             type="submit"
-            className="w-full p-3 bg-green-600 hover:bg-green-700 rounded font-semibold"
+            disabled={loading}
+            className="w-full p-3 bg-green-600 hover:bg-green-700 rounded font-semibold disabled:opacity-50"
           >
-            Create Account
+            {loading ? "Creating..." : "Create Account"}
           </button>
         </form>
 
@@ -64,3 +79,5 @@ export default function Signup() {
     </div>
   );
 }
+
+export default Signup;

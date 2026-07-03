@@ -1,16 +1,30 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
+import toast from "react-hot-toast";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const signin = useAuthStore((s) => s.signin);
 
-    console.log("Login attempt:", email, password);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await signin(email, password);
+      toast.success("Login successful!");
+      navigate("/markets");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,9 +59,10 @@ function Login() {
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full p-3 bg-blue-600 hover:bg-blue-700 rounded font-semibold"
           >
-            Sign In
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
