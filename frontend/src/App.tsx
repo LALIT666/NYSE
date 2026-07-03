@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./store/authStore";
+import { wsManager } from "./api/ws";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Markets from "./pages/Markets";
@@ -18,6 +19,8 @@ function App() {
 
   useEffect(() => {
     loadFromStorage();
+
+    wsManager.connect();
   }, [loadFromStorage]);
 
   return (
@@ -36,7 +39,6 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-
         <Route
           path="/markets"
           element={
@@ -45,8 +47,6 @@ function App() {
             </Protected>
           }
         />
-
-        {/* Trade route — :market URL param hai */}
         <Route
           path="/trade/:market"
           element={
@@ -55,7 +55,6 @@ function App() {
             </Protected>
           }
         />
-
         <Route path="*" element={<Navigate to="/markets" replace />} />
       </Routes>
     </BrowserRouter>
