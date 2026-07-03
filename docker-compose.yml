@@ -1,0 +1,116 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: exchange-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - exchange-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: exchange-timescaledb
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    networks:
+      - exchange-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  redis-engine:
+    build:
+      context: .
+      dockerfile: backend/redis-engine/Dockerfile
+    container_name: exchange-engine
+    environment:
+      REDIS_URL: ${REDIS_URL}
+      DATABASE_URL: ${DATABASE_URL}
+    networks:
+      - exchange-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      timescaledb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  httpserver:
+    build:
+      context: .
+      dockerfile: backend/httpserver/Dockerfile
+    container_name: exchange-httpserver
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_URL: ${REDIS_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
+    networks:
+      - exchange-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      timescaledb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ws-server:
+    build:
+      context: .
+      dockerfile: backend/ws-server/Dockerfile
+    container_name: exchange-ws
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      REDIS_URL: ${REDIS_URL}
+    networks:
+      - exchange-net
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_WS_URL: ${VITE_WS_URL}
+    container_name: exchange-frontend
+    ports:
+      - "5173:80"
+    networks:
+      - exchange-net
+    depends_on:
+      - httpserver
+      - ws-server
+    restart: unless-stopped
+
+networks:
+  exchange-net:
+    driver: bridge
+
+volumes:
+  timescale_data:
+    driver: local
