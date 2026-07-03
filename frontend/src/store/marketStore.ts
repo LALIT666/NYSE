@@ -25,6 +25,9 @@ interface MarketState {
   openOrders: Order[];
   fetchOpenOrders: () => Promise<void>;
 
+  orderHistory: Order[];
+  fetchOrderHistory: () => Promise<void>;
+
   balances: UserBalances | null;
   fetchBalances: () => Promise<void>;
 
@@ -58,6 +61,12 @@ export const useMarketStore = create<MarketState>((set) => ({
   fetchOpenOrders: async () => {
     const res = await http.get<{ orders: Order[] }>("/order/open/list");
     set({ openOrders: res.data.orders });
+  },
+
+  orderHistory: [],
+  fetchOrderHistory: async () => {
+    const res = await http.get<{ orders: Order[] }>("/order/history/list");
+    set({ orderHistory: res.data.orders });
   },
 
   balances: null,
