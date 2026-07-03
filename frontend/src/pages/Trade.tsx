@@ -5,6 +5,7 @@ import Orderbook from "../components/Orderbook";
 import OrderForm from "../components/OrderForm";
 import Balance from "../components/Balance";
 import RecentTrades from "../components/RecentTrades";
+import MyOrders from "../components/MyOrders";
 import { useMarketStore } from "../store/marketStore";
 import type { Market } from "../types";
 
@@ -14,23 +15,35 @@ function Trade() {
   const fetchDepth = useMarketStore((s) => s.fetchDepth);
   const fetchBalances = useMarketStore((s) => s.fetchBalances);
   const fetchRecentTrades = useMarketStore((s) => s.fetchRecentTrades);
+  const fetchOpenOrders = useMarketStore((s) => s.fetchOpenOrders);
   const setMarket = useMarketStore((s) => s.setMarket);
 
   useEffect(() => {
     if (!market) return;
 
     setMarket(market as Market);
+
+    // Initial data fetch
     fetchDepth(market as Market);
     fetchBalances();
     fetchRecentTrades(market as Market);
+    fetchOpenOrders();
 
+    // Polling — har 3 second
     const interval = setInterval(() => {
       fetchDepth(market as Market);
       fetchRecentTrades(market as Market);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [market, fetchDepth, fetchBalances, fetchRecentTrades, setMarket]);
+  }, [
+    market,
+    fetchDepth,
+    fetchBalances,
+    fetchRecentTrades,
+    fetchOpenOrders,
+    setMarket,
+  ]);
 
   return (
     <div className="min-h-screen">
@@ -63,7 +76,7 @@ function Trade() {
           </div>
 
           <div className="col-span-8 bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
-            <p className="text-gray-400">My orders coming soon...</p>
+            <MyOrders />
           </div>
         </div>
       </div>
