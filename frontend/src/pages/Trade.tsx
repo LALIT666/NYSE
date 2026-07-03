@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
+import { useMarketStore } from "../store/marketStore";
 import Navbar from "../components/Navbar";
 import Chart from "../components/Chart";
 import Orderbook from "../components/Orderbook";
@@ -7,91 +8,54 @@ import OrderForm from "../components/OrderForm";
 import Balance from "../components/Balance";
 import RecentTrades from "../components/RecentTrades";
 import MyOrders from "../components/MyOrders";
-import { useMarketStore } from "../store/marketStore";
-import { wsManager } from "../api/ws";
-import type { Market, Depth, Trade as TradeType } from "../types";
+import type { Market } from "../types";
 
-function Trade() {
-  const { market } = useParams<{ market: Market }>();
+const VALID_MARKETS: Market[] = ["TATA_INR", "PAYTM_INR", "ZOMATO_INR"];
 
-  const fetchDepth = useMarketStore((s) => s.fetchDepth);
-  const fetchBalances = useMarketStore((s) => s.fetchBalances);
-  const fetchRecentTrades = useMarketStore((s) => s.fetchRecentTrades);
-  const fetchOpenOrders = useMarketStore((s) => s.fetchOpenOrders);
+const Trade = () => {
+  const { market } = useParams<{ market: string }>();
   const setMarket = useMarketStore((s) => s.setMarket);
-  const setDepth = useMarketStore((s) => s.setDepth);
-  const addTrade = useMarketStore((s) => s.addTrade);
+  const fetchBalances = useMarketStore((s) => s.fetchBalances);
+
+  const isValidMarket = market && VALID_MARKETS.includes(market as Market);
 
   useEffect(() => {
-    if (!market) return;
+    if (isValidMarket) {
+      setMarket(market as Market);
+      fetchBalances();
+    }
+  }, [market, isValidMarket, setMarket, fetchBalances]);
 
-    setMarket(market as Market);
+  if (!isValidMarket) {
+    return <Navigate to="/markets" replace />;
+  }
 
-    fetchDepth(market as Market);
-    fetchBalances();
-    fetchRecentTrades(market as Market);
-    fetchOpenOrders();
-
-    const unsubDepth = wsManager.subscribe(`depth@${market}`, (data) => {
-      setDepth(data as Depth);
-    });
-
-    const unsubTrades = wsManager.subscribe(`trades@${market}`, (data) => {
-      addTrade(data as TradeType);
-    });
-
-    return () => {
-      unsubDepth();
-      unsubTrades();
-    };
-  }, [
-    market,
-    fetchDepth,
-    fetchBalances,
-    fetchRecentTrades,
-    fetchOpenOrders,
-    setMarket,
-    setDepth,
-    addTrade,
-  ]);
+  const currentMarket = market as Market;
 
   return (
     <div className="min-h-screen">
       <Navbar />
 
-      <div className="p-4">
-        <h1 className="text-xl font-bold mb-4">{market}</h1>
+      <div className="p-3 grid grid-cols-12 gap-3">
+        <div className="col-span-8 flex flex-col gap-3">
+          <Chart market={currentMarket} />
+          <MyOrders />
+        </div>
 
-        <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-8">
-            <Chart market={market as Market} />
+        <div className="col-span-2">
+          <div className="h-[500px]">
+            <Orderbook market={currentMarket} />
           </div>
+        </div>
 
-          <div className="col-span-4 space-y-4">
-            <div className="bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4 h-72">
-              <Orderbook />
-            </div>
-
-            <div className="bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
-              <OrderForm />
-            </div>
-
-            <div className="bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
-              <Balance />
-            </div>
-          </div>
-
-          <div className="col-span-4 bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
-            <RecentTrades />
-          </div>
-
-          <div className="col-span-8 bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
-            <MyOrders />
-          </div>
+        <div className="col-span-2 flex flex-col gap-3">
+          <OrderForm market={currentMarket} />
+          <Balance />
+          <RecentTrades market={currentMarket} />
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Trade;
