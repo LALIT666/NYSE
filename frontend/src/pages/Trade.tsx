@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Orderbook from "../components/Orderbook";
 import OrderForm from "../components/OrderForm";
+import Balance from "../components/Balance";
 import { useMarketStore } from "../store/marketStore";
 import type { Market } from "../types";
 
@@ -46,6 +47,10 @@ function Trade() {
 
             <div className="bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
               <OrderForm />
+            </div>
+
+            <div className="bg-[#18181b] border border-[#2a2a2e] rounded-lg p-4">
+              <Balance />
             </div>
           </div>
 
