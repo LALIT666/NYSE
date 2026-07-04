@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./store/authStore";
@@ -16,11 +16,21 @@ function Protected({ children }: { children: React.ReactNode }) {
 
 function App() {
   const loadFromStorage = useAuthStore((s) => s.loadFromStorage);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadFromStorage();
     wsManager.connect();
+    setLoading(false);
   }, [loadFromStorage]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>

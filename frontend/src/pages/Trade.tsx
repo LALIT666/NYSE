@@ -44,7 +44,7 @@ const Trade = () => {
 
         <div className="col-span-2">
           <div className="h-[500px]">
-            <Orderbook />
+            <Orderbook market={currentMarket} />
           </div>
         </div>
 
