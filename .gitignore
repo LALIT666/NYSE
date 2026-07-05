@@ -1,1 +1,31 @@
-node_modules
+# Env files
+.env
+.env.local
+.env.production
+**/.env
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+
+# Bun
+bun.lock
+**/bun.lock
+
+# Logs
+*.log
+logs/
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
+
+# Prisma
+backend/db/prisma/migrations/dev.db*
