@@ -54,6 +54,8 @@ services:
         condition: service_healthy
       timescaledb:
         condition: service_healthy
+      httpserver:
+        condition: service_started
     restart: unless-stopped
 
   httpserver:

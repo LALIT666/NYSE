@@ -1,7 +1,70 @@
--- TimescaleDB extension
+-- ==================== TimescaleDB Extension ====================
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
--- ==================== TRADES TABLE ====================
+-- ==================== ENUMS ====================
+DO $$ BEGIN
+  CREATE TYPE "OrderKind" AS ENUM ('buy', 'sell');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE "OrderType" AS ENUM ('limit', 'market');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE "OrderStatus" AS ENUM ('pending', 'partial', 'filled', 'cancelled');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE "Market" AS ENUM ('TATA_INR', 'PAYTM_INR', 'ZOMATO_INR');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE "Asset" AS ENUM ('INR', 'TATA', 'PAYTM', 'ZOMATO');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+-- ==================== USERS TABLE ====================
+CREATE TABLE IF NOT EXISTS "users" (
+  "userId"       TEXT PRIMARY KEY,
+  "email"        TEXT NOT NULL UNIQUE,
+  "passwordHash" TEXT NOT NULL,
+  "createdAt"    TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt"    TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==================== ORDERS TABLE ====================
+CREATE TABLE IF NOT EXISTS "orders" (
+  "orderId"        TEXT PRIMARY KEY,
+  "userId"         TEXT NOT NULL,
+  "kind"           "OrderKind" NOT NULL,
+  "type"           "OrderType" NOT NULL,
+  "price"          DOUBLE PRECISION NOT NULL,
+  "quantity"       DOUBLE PRECISION NOT NULL,
+  "filledQuantity" DOUBLE PRECISION NOT NULL DEFAULT 0,
+  "market"         "Market" NOT NULL,
+  "status"         "OrderStatus" NOT NULL DEFAULT 'pending',
+  "createdAt"      TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt"      TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "orders_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("userId") ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS "orders_userId_idx" ON "orders"("userId");
+CREATE INDEX IF NOT EXISTS "orders_market_status_idx" ON "orders"("market", "status");
+
+-- ==================== BALANCES TABLE ====================
+CREATE TABLE IF NOT EXISTS "balances" (
+  "id"        SERIAL PRIMARY KEY,
+  "userId"    TEXT NOT NULL,
+  "asset"     "Asset" NOT NULL,
+  "available" DOUBLE PRECISION NOT NULL DEFAULT 0,
+  "locked"    DOUBLE PRECISION NOT NULL DEFAULT 0,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "balances_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("userId") ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS "balances_userId_asset_key" ON "balances"("userId", "asset");
+CREATE INDEX IF NOT EXISTS "balances_userId_idx" ON "balances"("userId");
+
+-- ==================== TRADES TABLE (TimescaleDB) ====================
 CREATE TABLE IF NOT EXISTS trades (
   trade_id    TEXT NOT NULL,
   market      TEXT NOT NULL,

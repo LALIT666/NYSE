@@ -3,9 +3,8 @@ import { createClient, type RedisClientType } from "redis";
 import { v4 as uuidv4 } from "uuid";
 
 // ==================== CONFIG ====================
-const WS_PORT = 3001;
-const REDIS_URL = "redis://localhost:6379";
-
+export const WS_PORT = Number(process.env.PORT ?? 3001);
+const REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
 // ==================== TYPES ====================
 interface IncomingMessage {
   method: "SUBSCRIBE" | "UNSUBSCRIBE" | "PING";
