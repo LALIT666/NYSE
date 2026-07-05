@@ -28,4 +28,4 @@ logs/
 .DS_Store
 
 # Prisma
-backend/db/prisma/migrations/dev.db*
+backend/db/prisma/migrations/dev.db*.env
