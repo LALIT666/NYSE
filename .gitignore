@@ -29,3 +29,4 @@ logs/
 
 # Prisma
 backend/db/prisma/migrations/dev.db*.env
+**/.env
